@@ -15,7 +15,7 @@ VegNutri plans a week of real Indian meals around each user's calorie and protei
 - A grocery list generated from the plan and grouped by aisle.
 - A family kitchen: one menu with per-person portions. Children get ICMR-NIN reference values and never a deficit.
 - A micronutrient radar that compares the weekly average with ICMR-NIN 2020 reference intakes.
-- An AI coach (Groq, Llama models) that knows the user's targets, today's food, plan and diet rules, with safety rules built in.
+- An AI coach (Groq) that knows the user's targets, today's food, plan and diet rules, with safety rules built in.
 - Tracking for food, water, weight, mood, a calendar and milestones, plus custom dishes.
 - An installable phone app (PWA), light and dark themes, and full mobile support.
 
@@ -63,7 +63,7 @@ Every setting is an environment variable. See `.env.example` for the full list w
 |---|---|
 | `SECRET_KEY` | Required. A long random string. Sessions break without it. |
 | `DATABASE_URL` | Postgres in production. Defaults to a local SQLite file. |
-| `GROQ_API_KEY` | The AI coach. Free key at console.groq.com/keys. Free-tier limits are shared across your whole Groq organisation, not per key. |
+| `GROQ_API_KEY` | The AI coach. Create one at console.groq.com/keys. Run `flask --app wsgi coach-check` to test it. |
 | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` | Payments. |
 | `MAIL_SERVER` and related | Password-reset emails. Without it, emails are printed to the log. |
 | `SESSION_COOKIE_SECURE=1` | Set this in production (HTTPS). |
@@ -104,7 +104,7 @@ python scripts/import_v3_sqlite.py path/to/nutrition.db --dry-run   # preview
 python scripts/import_v3_sqlite.py path/to/nutrition.db
 ```
 
-Passwords keep working (old SHA-256 hashes are upgraded on first login). Targets are recalculated with the new, safer formula. Allergies written as free text are converted to filters. **Stored Gemini API keys from v3 are deliberately not imported.** They were kept in plain text, so treat them as exposed and ask anyone who entered one to revoke it in Google AI Studio.
+Passwords keep working (old SHA-256 hashes are upgraded on first login). Targets are recalculated with the new, safer formula. Allergies written as free text are converted to filters. **Stored Gemini API keys are deliberately not imported.** They were kept in plain text, so treat them as exposed and ask anyone who entered one to revoke it in Google AI Studio.
 
 When updating the GitHub repo, delete the old `app.py`, `templates/` and `static/` folders at the top level. Everything now lives in `vegnutri/`.
 
@@ -146,7 +146,7 @@ These need a human; code can't do them.
 - **Email.** Set up a transactional email provider (Amazon SES, Postmark, Zoho ZeptoMail) and a real support inbox.
 - **Monitoring.** Add uptime checks on `/healthz` and error tracking (for example Sentry).
 - **Backups.** Turn on automated Postgres backups.
-- **Coach limits.** The Groq free tier has daily request and token caps shared by all your users. Watch for 429s in the logs; if you outgrow it, move to Groq's paid Developer tier.
+- **AI spend and limits.** Watch usage in the Groq console and move to a paid tier before launch; free-tier rate limits are low. Pro quotas cap per-user cost.
 
 ## Roadmap
 
@@ -154,7 +154,7 @@ These are the highest-value next steps, roughly in order:
 
 1. **Grow the meal catalogue with a dietitian**, especially sattvic Maharashtrian, Bengali and Rajasthani, plus more vegan options. This is the product's moat.
 2. **Weekly WhatsApp or email summaries** ("You hit protein 5 of 7 days; iron was low"). This is the biggest retention lever.
-3. **Photo and voice logging** in Indian languages, via a vision/speech model (Groq also hosts Whisper for speech-to-text).
+3. **Photo and voice logging** in Indian languages, using a vision model and Groq's Whisper speech-to-text.
 4. **Dietitian marketplace.** Verified dietitians run paid programmes in the app and you take a commission.
 5. **Condition programmes** for PCOS, prediabetes and thyroid, built with clinicians.
 6. **Grocery partnerships.** Turn the grocery list into a cart through quick-commerce affiliate programmes where available.

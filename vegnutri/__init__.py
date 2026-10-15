@@ -135,6 +135,13 @@ def _register_cli(app):
         db.create_all()
         click.echo("Database tables created.")
 
+    @app.cli.command("coach-check")
+    def coach_check():
+        """Test the Groq connection and show exactly what's wrong if the coach fails."""
+        from .services.coach import diagnose
+        for line in diagnose():
+            click.echo(line)
+
     @app.cli.command("make-admin")
     @click.argument("email")
     def make_admin(email):

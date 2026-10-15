@@ -39,10 +39,9 @@ class Config:
     RATELIMIT_STORAGE_URI = os.environ.get("RATELIMIT_STORAGE_URI", "memory://")
     RATELIMIT_ENABLED = _bool("RATELIMIT_ENABLED", True)
 
-    # AI coach (server-side key; users never see or supply it)
+    # AI coach via Groq (server-side key; users never see or supply it)
     GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
-    # Optional: comma-separated model names, tried in order (default: llama-3.3-70b-versatile, llama-3.1-8b-instant)
-    GROQ_MODELS = os.environ.get("GROQ_MODELS", "")
+    GROQ_MODEL = os.environ.get("GROQ_MODEL", "")  # optional: force a specific model id
 
     # Payments
     RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "")
