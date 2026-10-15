@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Milestones{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Milestones</h1><p>{{ items|selectattr('unlocked')|list|length }} of {{ items|length }} reached. Current protein streak: {{ streak.current }} day{{ 's' if streak.current != 1 }}, best {{ streak.longest }}.</p></div>
+</div>
+<div class="badge-grid">
+  {% for a in items|sort(attribute='unlocked', reverse=true) %}
+  <section class="badge {% if a.unlocked %}done{% endif %}">
+    <h3>{{ a.name }}</h3>
+    <p class="muted">{{ a.desc }}</p>
+    <div class="bar turmeric" style="margin-top:.75rem"><span style="width:{{ a.pct }}%"></span></div>
+    <small class="muted num">{{ a.current }} / {{ a.target }}</small>
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

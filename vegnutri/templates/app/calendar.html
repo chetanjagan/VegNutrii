@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Calendar{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>{{ first.strftime('%B %Y') }}</h1><p>Each day shows the protein you logged.</p></div>
+  <div class="row">
+    <a class="btn btn-sm" href="{{ url_for('tracker.calendar', y=prev_m[0], m=prev_m[1]) }}">Previous month</a>
+    {% if (next_m[0], next_m[1]) <= (today.year, today.month) %}<a class="btn btn-sm" href="{{ url_for('tracker.calendar', y=next_m[0], m=next_m[1]) }}">Next month</a>{% endif %}
+  </div>
+</div>
+<section class="panel">
+  <div class="cal" role="grid" aria-label="{{ first.strftime('%B %Y') }}">
+    {% for d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}<div class="dow">{{ d }}</div>{% endfor %}
+    {% for i in range(offset) %}<div></div>{% endfor %}
+    {% for d in days %}
+    <div class="day {{ d.status }} {% if d.date == today %}today{% endif %}" title="{{ d.date.strftime('%d %b') }}: {{ d.kcal }} kcal, {{ d.protein }} g protein">
+      <span>{{ d.day }}</span>{% if d.status != 'none' %}<span class="p">{{ d.protein|int }}g</span>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  <div class="row" style="margin-top:1rem;font-size:.9rem">
+    <span class="row"><span class="cal"><span class="day great" style="width:14px;height:14px;padding:0"></span></span>Protein and calories on target</span>
+    <span class="row"><span class="cal"><span class="day good" style="width:14px;height:14px;padding:0"></span></span>One of the two</span>
+    <span class="row"><span class="cal"><span class="day logged" style="width:14px;height:14px;padding:0"></span></span>Logged, below target</span>
+  </div>
+</section>
+{% endblock %}

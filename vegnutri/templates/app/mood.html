@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Mood{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>How are you feeling?</h1><p>A quick daily check-in. Over time you may spot links between food, energy and mood.</p></div></div>
+<div class="grid grid-2">
+  <section class="panel">
+    <h2>{{ 'Update today' if today_log else 'Today' }}</h2>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <fieldset><legend class="sr-only">Mood</legend><div class="choices">
+        {% for k, lbl in moods.items() %}<label class="choice"><input type="radio" name="mood" value="{{ k }}" required {% if today_log and today_log.mood == k %}checked{% endif %}><span>{{ lbl }}</span></label>{% endfor %}
+      </div></fieldset>
+      <fieldset><legend style="font-size:.95rem">Energy</legend><div class="choices">
+        {% for e in range(1, 6) %}<label class="choice"><input type="radio" name="energy" value="{{ e }}" {% if (today_log.energy_level if today_log else 3) == e %}checked{% endif %}><span>{{ e }}</span></label>{% endfor %}
+      </div><span class="hint">1 is drained, 5 is full of energy.</span></fieldset>
+      <div class="field"><label for="note">Note (optional)</label><textarea id="note" name="note" maxlength="500">{{ today_log.note if today_log else '' }}</textarea></div>
+      <button class="btn btn-primary" type="submit">Save check-in</button>
+    </form>
+  </section>
+  <section class="panel">
+    <h2>Recent days</h2>
+    {% if logs %}
+    <div class="divided">{% for l in logs %}<div class="list-row"><span>{{ l.log_date.strftime('%a %d %b') }}{% if l.note %}<br><small class="muted">{{ l.note }}</small>{% endif %}</span><span>{{ moods[l.mood] }}<br><small class="muted">Energy {{ l.energy_level }}/5</small></span></div>{% endfor %}</div>
+    {% else %}<p class="muted">Your check-ins will appear here.</p>{% endif %}
+  </section>
+</div>
+<p class="hint" style="margin-top:1rem">If low mood lasts more than two weeks, please talk to someone you trust or a doctor. In India you can call the Tele-MANAS helpline on 14416.</p>
+{% endblock %}

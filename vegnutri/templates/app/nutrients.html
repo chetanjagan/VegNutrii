@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}Nutrients{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Nutrients vegetarians watch</h1>
+    <p>Your daily average over the last 7 days ({{ report.days_logged }} day{{ 's' if report.days_logged != 1 }} logged), against ICMR-NIN 2020 reference intakes.</p>
+  </div>
+</div>
+{% if report.days_logged < 3 %}<p class="notice" style="margin-bottom:1rem"><strong>Log at least 3 days for a useful picture.</strong>One day on its own can look low or high just by chance.</p>{% endif %}
+<div class="grid grid-2">
+  {% for n in report["items"] %}
+  <section class="panel">
+    {% if n.locked %}
+      <div class="panel-head"><h2>{{ n.label }}</h2><span class="tag turmeric">{{ icon('lock') }} Pro</span></div>
+      <p class="muted">See your {{ n.label|lower }} intake and the foods that fit your diet.</p>
+      <a class="btn btn-sm" style="margin-top:.75rem" href="{{ url_for('billing.pricing') }}">Unlock with Pro</a>
+    {% else %}
+      <div class="panel-head"><h2>{{ n.label }}</h2>{% if n.low %}<span class="tag" style="color:var(--chilli)">Running low</span>{% endif %}</div>
+      <p class="num" style="font-size:1.6rem;font-weight:800">{{ n.avg|num(1) }} <small class="muted">of {{ n.target|num(1) }} {{ n.unit }} a day</small></p>
+      <div class="bar {% if n.low %}low{% endif %}" style="margin:.5rem 0 .9rem"><span style="width:{{ [n.pct, 100]|min }}%"></span></div>
+      <p class="muted">{{ n.advice }}</p>
+    {% endif %}
+  </section>
+  {% endfor %}
+</div>
+<p class="hint" style="margin-top:1rem">Estimates from food composition data, not a blood test. If you often feel tired or breathless, ask your doctor about checking haemoglobin, B12 and vitamin D.</p>
+{% endblock %}

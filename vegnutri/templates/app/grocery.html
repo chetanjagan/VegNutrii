@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Grocery list{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Grocery list</h1>
+    <p>Everything for the next {{ days }} day{{ 's' if days != 1 }} of your plan{% if multiplier > 1 %}, scaled for your household ({{ multiplier|round(1) }}× portions){% endif %}. Roughly ₹{{ cost|num }} in total.</p>
+  </div>
+  <button type="button" class="btn no-print" data-action="print">Print list</button>
+</div>
+{% if not full %}<p class="notice no-print" style="margin-bottom:1rem"><strong>Shopping once a week?</strong>Pro builds the list for all 7 days. <a href="{{ url_for('billing.pricing') }}">See Pro</a></p>{% endif %}
+<div class="grid grid-3">
+  {% for aisle, items in grocery.items() %}
+  <section class="panel">
+    <h2>{{ aisle }}</h2>
+    <ul style="list-style:none" class="divided">
+      {% for name, amount in items %}
+      <li class="list-row"><label class="check" style="margin:0"><input type="checkbox"><span>{{ name }}</span></label><span class="num muted">{{ amount }}</span></li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% else %}
+  <p class="muted">Your plan is empty. <a href="{{ url_for('planner.meal_plan') }}">Create a plan</a> first.</p>
+  {% endfor %}
+</div>
+<p class="hint" style="margin-top:1rem">Amounts are rounded up and cover cooking for the planned portions. Spices, salt and whatever's already in your kitchen aren't listed.</p>
+{% endblock %}

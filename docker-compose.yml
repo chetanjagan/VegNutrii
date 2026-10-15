@@ -1,0 +1,26 @@
+# Local production-like stack: `docker compose up --build`, then open http://localhost:8000
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: vegnutri
+      POSTGRES_PASSWORD: vegnutri
+      POSTGRES_DB: vegnutri
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vegnutri"]
+      interval: 5s
+      retries: 10
+  web:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://vegnutri:vegnutri@db:5432/vegnutri
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  pgdata:

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Targets and diet' if profile else 'Set up your plan' }}{% endblock %}
+{% macro val(name, default='') -%}{{ form.get(name) if form.get(name) is not none else (profile[name] if profile else default) }}{%- endmacro %}
+{% block content %}
+{% set ns = namespace() %}
+{% set ns.diet = form.get('diet_mode') or (profile.diet_mode if profile else 'vegetarian') %}
+{% set ns.cuisine = form.get('cuisine') or (profile.cuisine if profile else 'north_indian') %}
+{% set ns.goal = form.get('goal') or (profile.goal if profile else 'maintenance') %}
+{% set ns.gender = form.get('gender') or (profile.gender if profile else '') %}
+{% set ns.activity = form.get('activity_level') or (profile.activity_level if profile else 'light') %}
+{% set ns.allergies = form.getlist('allergies') if form.getlist is defined and form.getlist('allergies') else (profile.allergy_list if profile else []) %}
+{% set ns.fasting = (form.getlist('fasting_days') if form.getlist is defined and form.getlist('fasting_days') else (profile.fasting_days.split(',') if profile else [])) %}
+{% set goals = {'fat_loss': 'Lose fat', 'maintenance': 'Maintain weight', 'muscle_gain': 'Build muscle'} %}
+{% set acts = [('sedentary','Mostly sitting'),('light','Light exercise 1-3 days a week'),('moderate','Exercise 3-5 days a week'),('active','Hard exercise 6-7 days a week'),('very_active','Physical job or twice-daily training')] %}
+{% set allergy_opts = [('peanut','Peanuts'),('nuts','Tree nuts'),('gluten','Gluten (wheat)'),('soy','Soy'),('dairy','Dairy'),('sesame','Sesame'),('coconut','Coconut')] %}
+{% set days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+
+<div class="page-head onboard">
+  <div>
+    <h1>{{ 'Your targets and diet' if profile else "Let's plan around you" }}</h1>
+    <p>{{ 'Changing these rebuilds your meal plan from today.' if profile else 'This takes about a minute. You can change anything later.' }}</p>
+  </div>
+</div>
+{% if profile %}
+<p class="panel onboard" style="margin-bottom:1.25rem">Current targets: <strong class="num">{{ profile.daily_calories|num }} kcal</strong>, <strong class="num">{{ profile.daily_protein }} g protein</strong> and <strong class="num">{{ (profile.water_goal_ml/1000)|round(1) }} L water</strong> a day.</p>
+{% endif %}
+
+<form method="post" class="panel onboard">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <fieldset>
+    <legend>About you</legend>
+    <div class="fields">
+      <div class="field"><label for="age">Age</label><input id="age" name="age" type="number" inputmode="numeric" min="13" max="100" required value="{{ val('age') }}"></div>
+      <div class="field"><label for="height">Height (cm)</label><input id="height" name="height" type="number" inputmode="decimal" step="0.5" min="100" max="230" required value="{{ val('height') }}"></div>
+      <div class="field"><label for="weight">Weight (kg)</label><input id="weight" name="weight" type="number" inputmode="decimal" step="0.1" min="25" max="300" required value="{{ val('weight') }}"></div>
+    </div>
+    <div class="choices" role="radiogroup" aria-label="Sex">
+      {% for k, lbl in [('female','Female'),('male','Male')] %}
+      <label class="choice"><input type="radio" name="gender" value="{{ k }}" required {% if ns.gender == k %}checked{% endif %}><span>{{ lbl }}</span></label>
+      {% endfor %}
+    </div>
+    <span class="hint">Used only to estimate energy needs and reference intakes.</span>
+  </fieldset>
+
+  <fieldset>
+    <legend>Your goal</legend>
+    <div class="choices">
+      {% for k, lbl in goals.items() %}
+      <label class="choice"><input type="radio" name="goal" value="{{ k }}" {% if ns.goal == k %}checked{% endif %}><span>{{ lbl }}</span></label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>How active are you?</legend>
+    <div class="field"><label for="activity_level" class="sr-only">Activity</label>
+      <select id="activity_level" name="activity_level">
+        {% for k, lbl in acts %}<option value="{{ k }}" {% if ns.activity == k %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+      </select></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Your kitchen's rules</legend>
+    <div class="choices">
+      {% for k, (lbl, _) in DIET_MODES.items() %}
+      <label class="choice"><input type="radio" name="diet_mode" value="{{ k }}" {% if ns.diet == k %}checked{% endif %}><span>{{ lbl }}</span></label>
+      {% endfor %}
+    </div>
+    <p class="hint" style="margin:.75rem 0 .5rem">Avoid any of these?</p>
+    <div class="choices">
+      {% for k, lbl in allergy_opts %}
+      <label class="choice"><input type="checkbox" name="allergies" value="{{ k }}" {% if k in ns.allergies %}checked{% endif %}><span>{{ lbl }}</span></label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Food you love</legend>
+    <div class="choices">
+      {% for k, lbl in CUISINES.items() %}
+      <label class="choice"><input type="radio" name="cuisine" value="{{ k }}" {% if ns.cuisine == k %}checked{% endif %}><span>{{ lbl }}</span></label>
+      {% endfor %}
+    </div>
+    <div class="fields" style="margin-top:1rem">
+      <div class="field"><label for="cooking_time">Most time you'll spend cooking a meal</label>
+        <select id="cooking_time" name="cooking_time">
+          {% for m in [15, 20, 30, 45, 60] %}<option value="{{ m }}" {% if (val('cooking_time', 30)|int) == m %}selected{% endif %}>{{ m }} minutes</option>{% endfor %}
+        </select></div>
+      <div class="field"><label for="daily_budget">Daily food budget (₹) {% if not has_feature('budget') %}<span class="tag turmeric">Pro</span>{% endif %}</label>
+        <input id="daily_budget" name="daily_budget" type="number" inputmode="numeric" min="0" max="5000" step="10" value="{{ val('daily_budget', 0) }}">
+        <span class="hint">0 means no limit.{% if not has_feature('budget') %} Saved now, used once you upgrade.{% endif %}</span></div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Weekly fasting days {% if not has_feature('fasting') %}<span class="tag turmeric">Pro</span>{% endif %}</legend>
+    <div class="choices">
+      {% for d in days %}
+      <label class="choice"><input type="checkbox" name="fasting_days" value="{{ loop.index0 }}" {% if (loop.index0|string) in ns.fasting %}checked{% endif %}><span>{{ d }}</span></label>
+      {% endfor %}
+    </div>
+    <span class="hint">Those days get vrat meals: sabudana, kuttu, rajgira, samak, fruit and dairy.</span>
+  </fieldset>
+
+  <p class="hint" style="margin-bottom:1rem">For adults in general good health. If you're pregnant, breastfeeding or managing a medical condition, check your targets with a doctor.</p>
+  <button class="btn btn-primary" type="submit">{{ 'Save and rebuild my plan' if profile else 'Build my plan' }}</button>
+</form>
+{% endblock %}

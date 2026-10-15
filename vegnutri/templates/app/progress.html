@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Weight and progress{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Weight and progress</h1><p>Weigh yourself at the same time of day, a few times a week. The trend matters more than any single day.</p></div>
+</div>
+<div class="grid grid-2">
+  <section class="panel">
+    <h2>Log weight</h2>
+    <form method="post" class="fields" style="align-items:end">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field"><label for="weight">Weight (kg)</label><input id="weight" name="weight" type="number" step="0.1" min="25" max="300" required value="{{ current }}"></div>
+      <div class="field"><label for="log_date">Date</label><input id="log_date" name="log_date" type="date" max="{{ today.isoformat() }}" value="{{ today.isoformat() }}"></div>
+      <div class="field"><button class="btn btn-primary btn-block" type="submit">Save</button></div>
+    </form>
+    <div class="grid grid-3" style="margin-top:.5rem">
+      <div class="stat"><span class="muted">Now</span><span class="num">{{ current|num(1) }}<small> kg</small></span></div>
+      <div class="stat"><span class="muted">BMI</span><span class="num">{{ bmi.bmi }}</span><small class="muted">{{ bmi.category }}</small></div>
+      <div class="stat"><span class="muted">Healthy range</span><span class="num" style="font-size:1.3rem">{{ bmi.healthy_low|num }}-{{ bmi.healthy_high|num }}<small> kg</small></span></div>
+    </div>
+    <p class="hint" style="margin-top:.75rem">BMI uses the lower cut-offs WHO recommends for Asian adults. It doesn't account for muscle, so treat it as a rough guide.</p>
+  </section>
+  <section class="panel">
+    <h2>Weight trend</h2>
+    {% if weights|length > 1 %}
+    <div style="height:240px"><canvas data-chart='{{ {"type":"line","labels":weights|map(attribute="log_date")|map("string")|list,"series":[{"label":"Weight (kg)","data":weights|map(attribute="weight")|list,"color":"leaf"}],"beginAtZero":false}|tojson|forceescape }}' aria-label="Weight over time"></canvas></div>
+    {% else %}<p class="muted">Log your weight on two or more days to see a trend.</p>{% endif %}
+  </section>
+</div>
+<section class="panel" style="margin-top:1rem">
+  <h2>Last 30 days</h2>
+  <div style="height:260px"><canvas data-chart='{{ {"type":"bar","labels":labels,"series":[{"label":"Protein (g)","data":protein30,"color":"leaf"},{"label":"Target","data":[p.daily_protein]*30,"type":"line","color":"turmeric","dashed":true}]}|tojson|forceescape }}' aria-label="Protein each day for 30 days"></canvas></div>
+  <div style="height:220px;margin-top:1rem"><canvas data-chart='{{ {"type":"line","labels":labels,"series":[{"label":"Calories","data":kcal30,"color":"turmeric"},{"label":"Target","data":[p.daily_calories]*30,"color":"leaf","dashed":true}]}|tojson|forceescape }}' aria-label="Calories each day for 30 days"></canvas></div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='vendor/chart-4.4.0.umd.js') }}"></script>{% endblock %}

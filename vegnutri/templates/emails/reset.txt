@@ -1,0 +1,9 @@
+Hi {{ user.username }},
+
+Someone asked to reset the password for your {{ app_name }} account. If it was you, open this link within 1 hour:
+
+{{ link }}
+
+If you didn't ask for this, ignore this email. Your password won't change.
+
+{{ app_name }}

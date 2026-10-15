@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Pricing{% endblock %}
+{% macro body() %}
+<div class="page-head">
+  <div>
+    <h1>Plans and pricing</h1>
+    <p>Pay once by UPI, card or netbanking. No auto-debit: when your plan ends you return to Free.</p>
+  </div>
+</div>
+{% if demo %}<p class="notice"><strong>Demo billing is on.</strong>Upgrades are free and instant on this local copy. Never enable this in production.</p>{% elif not configured %}<p class="notice"><strong>Payments aren't set up on this server yet.</strong>Add Razorpay keys to the environment to take payments.</p>{% endif %}
+
+<div class="period-toggle" role="group" aria-label="Billing period">
+  <button type="button" data-period="month" aria-pressed="false">Monthly</button>
+  <button type="button" data-period="year" aria-pressed="true">Yearly (save 41%)</button>
+</div>
+
+<div class="grid grid-3">
+  <section class="panel price-card">
+    <h2>Free</h2>
+    <p class="price">₹0</p>
+    <p class="muted">Everything you need to start tracking.</p>
+    <ul>
+      <li>Food, water, weight and mood tracking</li>
+      <li>3-day meal plans for your diet</li>
+      <li>5 coach questions a day</li>
+      <li>Iron tracking</li>
+      <li>2-day grocery list</li>
+    </ul>
+    {% if current_user.is_authenticated %}<span class="btn" aria-disabled="true">{% if current_user.active_plan == 'free' %}Your current plan{% else %}Included{% endif %}</span>
+    {% else %}<a class="btn" href="{{ url_for('auth.register') }}">Start free</a>{% endif %}
+  </section>
+
+  <section class="panel price-card featured">
+    <h2>Pro</h2>
+    <p class="price" data-price-month="{{ plans.pro.prices.month|inr }}" data-price-year="{{ plans.pro.prices.year|inr }}">{{ plans.pro.prices.year|inr }}<small> / year</small></p>
+    <p class="muted">For people serious about their protein.</p>
+    <ul>
+      <li>Full 7-day plans</li>
+      <li>Plans built to your daily budget</li>
+      <li>Vrat and fasting-day plans</li>
+      <li>Iron, calcium, B12 and zinc tracking</li>
+      <li>Weekly grocery list from your plan</li>
+      <li>60 coach questions a day</li>
+    </ul>
+    {% if current_user.is_authenticated %}
+      <button type="button" class="btn btn-primary" data-checkout="pro" data-period="year" {% if not configured and not demo %}disabled{% endif %}>
+        {% if current_user.active_plan == 'pro' %}Add more time{% else %}Get Pro{% endif %}</button>
+    {% else %}
+      <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Start free, upgrade anytime</a>
+    {% endif %}
+  </section>
+
+  <section class="panel price-card">
+    <h2>Family</h2>
+    <p class="price" data-price-year="{{ plans.family.prices.year|inr }}">{{ plans.family.prices.year|inr }}<small> / year</small></p>
+    <p class="muted">One kitchen, everyone's portions.</p>
+    <ul>
+      <li>Everything in Pro</li>
+      <li>Add up to {{ plans.family.max_members }} family members</li>
+      <li>Per-person portions for each meal</li>
+      <li>Grocery list scaled for the household</li>
+      <li>100 coach questions a day</li>
+    </ul>
+    {% if current_user.is_authenticated %}
+      <button type="button" class="btn btn-primary" data-checkout="family" data-period="year" {% if not configured and not demo %}disabled{% endif %}>
+        {% if current_user.active_plan == 'family' %}Add another year{% else %}Get Family{% endif %}</button>
+    {% else %}
+      <a class="btn" href="{{ url_for('auth.register') }}">Start free, upgrade anytime</a>
+    {% endif %}
+  </section>
+</div>
+<p class="muted" style="margin-top:1.25rem">Prices include GST where applicable. See the <a href="{{ url_for('main.refunds') }}">refund policy</a>. Family is billed yearly only.</p>
+{% endmacro %}
+
+{% block content %}{{ body() }}{% endblock %}
+{% block public %}{{ body() }}{% endblock %}
+{% block scripts %}{% if current_user.is_authenticated and (configured and not demo) %}<script src="https://checkout.razorpay.com/v1/checkout.js"></script>{% endif %}{% endblock %}

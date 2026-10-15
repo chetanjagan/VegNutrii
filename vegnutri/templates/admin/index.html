@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Business overview</h1><p>Live numbers from the database.</p></div></div>
+<div class="grid grid-3">
+  {% for label, value, sub in [
+      ('Users', stats.users|num, stats.new_7 ~ ' new this week'),
+      ('Active this week', stats.active_7|num, 'logged at least one meal'),
+      ('Paying', stats.paid|num, stats.pro ~ ' Pro, ' ~ stats.family ~ ' Family'),
+      ('Conversion', stats.conversion ~ '%', 'of all users pay'),
+      ('Revenue, 30 days', stats.revenue_30|inr, 'paid orders'),
+      ('Coach questions', stats.coach_7|num, 'this week')] %}
+  <section class="panel stat"><span class="muted">{{ label }}</span><span class="num">{{ value }}</span><small class="muted">{{ sub }}</small></section>
+  {% endfor %}
+</div>
+<section class="panel" style="margin-top:1rem">
+  <h2>Sign-ups, last 14 days</h2>
+  <div style="height:220px"><canvas data-chart='{{ {"type":"bar","labels":signups|map(attribute=0)|list,"series":[{"label":"Sign-ups","data":signups|map(attribute=1)|list,"color":"leaf"}]}|tojson|forceescape }}'></canvas></div>
+</section>
+<section class="panel" style="margin-top:1rem">
+  <h2>Recent payments</h2>
+  {% if payments %}
+  <div class="scroll-x"><table><thead><tr><th>Paid</th><th>Order</th><th>Plan</th><th class="r">Amount</th></tr></thead>
+  <tbody>{% for p in payments %}<tr><td>{{ p.paid_at.strftime('%d %b %Y %H:%M') }}</td><td><code>{{ p.order_id }}</code></td><td>{{ p.plan|title }}, {{ p.period }}</td><td class="r num">{{ p.amount_paise|inr }}</td></tr>{% endfor %}</tbody></table></div>
+  {% else %}<p class="muted">No payments yet.</p>{% endif %}
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='vendor/chart-4.4.0.umd.js') }}"></script>{% endblock %}

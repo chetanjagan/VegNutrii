@@ -1,0 +1,57 @@
+{% extends "legal/_layout.html" %}
+{# TEMPLATE: have a lawyer review before launch. Fill in company details and grievance officer. #}
+{% block title %}Privacy policy{% endblock %}
+{% block legal %}
+<h1>Privacy policy</h1>
+<p>{{ company_name }} ("we") runs {{ app_name }}. This policy explains what personal data we collect, why, and the choices you have. We process your data under India's Digital Personal Data Protection Act, 2023.</p>
+
+<h2>What we collect</h2>
+<ul>
+  <li>Account details: your name, email address and password (stored only as a secure hash).</li>
+  <li>Health and lifestyle details you give us: age, sex, height, weight, activity level, goal, diet type, food allergies, fasting days and budget.</li>
+  <li>What you log: meals, water, weight, mood notes, custom dishes, and the questions you ask the coach.</li>
+  <li>Details of family members you add on the Family plan: name, age, sex, height, weight and activity. Only add people who have agreed to this, and for children, only as their parent or guardian.</li>
+  <li>Payment records: plan, amount, date and payment reference. Card and UPI details go directly to Razorpay; we never see or store them.</li>
+  <li>Basic technical data: IP address and browser type, used for security and to prevent abuse.</li>
+</ul>
+
+<h2>Why we use it</h2>
+<ul>
+  <li>To calculate your targets, build your meal plans and show your progress.</li>
+  <li>To answer coach questions. Your question and a summary of your profile and today's food are sent to Groq, our AI service provider, to generate a reply.</li>
+  <li>To process payments and keep the records tax law requires.</li>
+  <li>To send emails you ask for (password resets) and, only if you opt in, occasional recipes and meal ideas.</li>
+  <li>To keep the service secure and fix problems.</li>
+</ul>
+<p>We do not sell your data. We do not show ads, and we don't share your health details with advertisers or insurers.</p>
+
+<h2>Who processes it for us</h2>
+<ul>
+  <li>Our hosting and database provider, which stores the data.</li>
+  <li>Groq (AI inference API), for coach replies.</li>
+  <li>Razorpay, for payments.</li>
+  <li>Our email provider, for account emails.</li>
+</ul>
+<p>Some of these providers may process data outside India. We use providers who commit to protecting it.</p>
+
+<h2>How long we keep it</h2>
+<p>We keep your data while your account is open. When you delete your account we erase your profile, logs, plans, coach history and family members straight away. Payment records are kept, without your name, for as long as tax law requires (currently up to 8 years).</p>
+
+<h2>Your rights</h2>
+<ul>
+  <li>See and download your data: Account, then "Download my data".</li>
+  <li>Correct it: edit your profile and logs at any time.</li>
+  <li>Erase it: Account, then "Delete my account".</li>
+  <li>Withdraw consent: delete your account, or turn off marketing emails in Account.</li>
+  <li>Complain: contact our grievance officer below. If you're not satisfied, you may approach the Data Protection Board of India.</li>
+</ul>
+
+<h2>Age</h2>
+<p>{{ app_name }} is for adults aged 18 and over. Don't create an account for a child; add them as a family member instead, as their parent or guardian.</p>
+
+<h2>Security</h2>
+<p>We use encrypted connections (HTTPS), hashed passwords, and access controls. No system is perfectly secure; if a breach affects you, we'll tell you and the authorities as the law requires.</p>
+
+<h2>Grievance officer</h2>
+<p>[Name], [Designation], {{ company_name }}, [Registered address]. Email: <a href="mailto:{{ support_email }}">{{ support_email }}</a>. We'll respond within 30 days.</p>
+{% endblock %}

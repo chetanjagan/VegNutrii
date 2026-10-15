@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ meal.name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ meal.name }}</h1>
+    <p>{{ meal.mins }} minutes. {{ meal.kcal|num }} kcal, {{ meal.protein|num }} g protein per plate as planned.</p>
+  </div>
+  <a class="btn" href="{{ url_for('planner.meal_plan') }}">Back to plan</a>
+</div>
+<div class="grid grid-2">
+  <section class="panel">
+    <h2>On the plate</h2>
+    <div class="divided">
+      {% for c, q in parts %}
+      <div class="list-row"><span>{{ c.name }}<br><small class="muted">{{ (q|string).rstrip('0').rstrip('.') }} × {{ c.serving }}</small></span><span class="num">{{ (c.kcal*q)|num }} kcal</span></div>
+      {% endfor %}
+    </div>
+    <h3 style="margin-top:1.25rem">Nutrition</h3>
+    <div class="scroll-x"><table>
+      <tbody>
+        {% for label, key, unit in [('Protein','protein','g'),('Carbohydrate','carbs','g'),('Fat','fat','g'),('Fibre','fiber','g'),('Iron','iron','mg'),('Calcium','calcium','mg'),('Vitamin B12','b12','mcg'),('Zinc','zinc','mg')] %}
+        <tr><td>{{ label }}</td><td class="r num">{{ meal[key]|num(1) }} {{ unit }}</td></tr>
+        {% endfor %}
+        <tr><td>Approximate ingredient cost</td><td class="r num">₹{{ meal.cost|num }}</td></tr>
+      </tbody>
+    </table></div>
+    <p class="hint" style="margin-top:.75rem">Values are estimates from standard Indian food composition data. Your portions and recipe will vary.</p>
+    {% if meal.tags %}<p class="row" style="margin-top:.75rem">{% for t in meal.tags|sort %}<span class="tag">{{ {'onion_garlic':'Onion or garlic','root':'Root vegetables','dairy':'Dairy','gluten':'Gluten','peanut':'Peanuts','nuts':'Tree nuts','soy':'Soy','coconut':'Coconut','egg':'Egg','fasting':'Vrat friendly'}.get(t, t) }}</span>{% endfor %}</p>{% endif %}
+  </section>
+  <section class="panel">
+    {% if recipe %}
+    <h2>How to make it</h2>
+    <p class="muted">{{ recipe.description }}</p>
+    <p style="margin:.5rem 0">Prep {{ recipe.prep_time }}, cook {{ recipe.cook_time }}, serves {{ recipe.servings }}.</p>
+    <h3 style="margin-top:1rem">Ingredients</h3>
+    <ul style="padding-left:1.2rem;margin:.5rem 0 1rem">{% for i in recipe.ingredients %}<li>{{ i }}</li>{% endfor %}</ul>
+    <h3>Method</h3>
+    <ol style="padding-left:1.2rem;margin-top:.5rem" class="stack">{% for s in recipe.steps %}<li>{{ s }}</li>{% endfor %}</ol>
+    {% if recipe.tips %}<p class="notice" style="margin-top:1rem"><strong>Tip</strong>{{ recipe.tips }}</p>{% endif %}
+    {% else %}
+    <h2>Need the recipe?</h2>
+    <p class="muted">We haven't written up this one yet. The coach can give you a recipe that fits your diet.</p>
+    <a class="btn btn-primary" style="margin-top:1rem" href="{{ url_for('coach.page', ask='Give me a simple recipe for ' ~ meal.name ~ ' that fits my diet.') }}">Ask the coach</a>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

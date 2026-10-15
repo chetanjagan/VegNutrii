@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "_macros.html" import thali %}
+{% set public_layout = true %}
+{% block title %}{{ app_name }}: meal plans for Indian vegetarians{% endblock %}
+{% block public %}
+<section class="hero">
+  <div>
+    <h1>Meal plans that know Jain from sattvic.</h1>
+    <p class="lede">{{ app_name }} plans a week of Indian vegetarian meals around your protein target, your budget and your kitchen's rules. Then it tracks the iron, B12 and calcium that vegetarians most often run short on.</p>
+    <div class="row">
+      <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Start free</a>
+      <a class="btn" href="{{ url_for('billing.pricing') }}">See pricing</a>
+    </div>
+    <div class="modes" aria-label="Diets supported">
+      {% for m in ['Jain', 'Sattvic', 'Vegan', 'Eggetarian', 'Lactose-free', 'Navratri and Ekadashi'] %}<span class="tag leaf">{{ m }}</span>{% endfor %}
+    </div>
+  </div>
+  <div>
+    {{ thali([('k-cal','1,640','kcal',86), ('k-pro','71 g','protein',79), ('k-water','2.0 L','water',80), ('k-iron','17 mg','iron',59)],
+             '19 g', 'protein to go', 'Example day: 1,640 of 1,900 kcal, 71 of 90 g protein, 2 of 2.5 litres water, 17 of 29 mg iron') }}
+  </div>
+</section>
+
+<section class="section">
+  <h2>Built around how India actually eats</h2>
+  <p class="lead">Generic calorie apps treat dal as an afterthought. Every one of our {{ meal_count }} meals is a real Indian plate with known nutrients, cost and ingredients.</p>
+  <div class="grid grid-3">
+    <div class="feature"><h3>Your kitchen's rules, strictly</h3><p>Jain plans never include onion, garlic or root vegetables. Sattvic, vegan, lactose-free and eggetarian work the same way, along with nut, gluten and soy allergies.</p></div>
+    <div class="feature"><h3>Vrat days planned properly</h3><p>Mark your Ekadashi or Navratri days and those days switch to sabudana, kuttu, rajgira and samak meals that still reach your protein.</p></div>
+    <div class="feature"><h3>Protein that fits your budget</h3><p>Set a daily food budget and the planner leans on chana, soya and dal instead of costly imports, without dropping your protein.</p></div>
+    <div class="feature"><h3>One kitchen, whole family</h3><p>Cook one menu. {{ app_name }} works out each person's portion, from a growing child to a diabetic parent, and scales the grocery list.</p></div>
+    <div class="feature"><h3>The nutrients vegetarians miss</h3><p>See your weekly iron, calcium, B12 and zinc against ICMR-NIN reference intakes, with food fixes that suit your diet.</p></div>
+    <div class="feature"><h3>A coach that knows your day</h3><p>Ask "what should I eat for dinner?" and get an answer based on what you've eaten, what's planned and what your diet allows.</p></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>From sign-up to a full week in two minutes</h2>
+  <ol class="steps">
+    <li><h3>Tell us your diet and goal</h3><p class="muted">Age, height, weight, diet type, cuisine, cooking time and budget.</p></li>
+    <li><h3>Get a week planned to your targets</h3><p class="muted">Each day is matched to your calories and protein, with portions adjusted to fit.</p></li>
+    <li><h3>Tap to log, swap or shop</h3><p class="muted">Log a planned meal in one tap, swap anything you don't fancy, and take the grocery list to the market.</p></li>
+  </ol>
+</section>
+
+<section class="section">
+  <h2>Start free. Upgrade when it's earning its place.</h2>
+  <p class="lead">Free covers tracking, 3-day plans and 5 coach questions a day. Pro is {{ plans.pro.prices.month|inr }} a month or {{ plans.pro.prices.year|inr }} a year, paid once by UPI or card, with no auto-debit.</p>
+  <a class="btn btn-primary" href="{{ url_for('billing.pricing') }}">Compare plans</a>
+</section>
+
+<section class="section">
+  <h2>Questions</h2>
+  <details><summary>Is this medical advice?</summary><p>No. {{ app_name }} gives general nutrition guidance for healthy adults. If you're pregnant, have diabetes, kidney disease or another condition, or are planning for a child, check with your doctor or a registered dietitian.</p></details>
+  <details><summary>Which cuisines are covered?</summary><p>North Indian, South Indian, Gujarati, Maharashtrian and Bengali, plus pan-Indian staples and vrat meals. Add your own dishes in My foods.</p></details>
+  <details><summary>Will I be charged automatically?</summary><p>No. Each payment covers one month or one year. When it ends you move back to Free, and nothing is debited unless you choose to renew.</p></details>
+  <details><summary>Can I install it on my phone?</summary><p>Yes. Open {{ app_name }} in Chrome or Safari and choose "Add to Home screen". It opens like an app.</p></details>
+  <details><summary>What happens to my data?</summary><p>It's used only to run your plan and coach. You can download all of it or delete your account at any time from Account. Read the <a href="{{ url_for('main.privacy') }}">privacy policy</a>.</p></details>
+</section>
+{% endblock %}

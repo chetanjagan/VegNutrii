@@ -1,0 +1,440 @@
+{
+ "moong_chilla_curd": {
+  "description": "High-protein savoury pancakes of yellow moong dal with green chutney and curd. No onion, garlic or root vegetables, so it suits Jain kitchens.",
+  "prep_time": "10 min (+ 4 hr soak)",
+  "cook_time": "15 min",
+  "servings": 1,
+  "ingredients": [
+   "½ cup yellow moong dal, soaked 4 hours and drained",
+   "1 green chilli",
+   "Pinch of hing (asafoetida)",
+   "½ tsp cumin seeds",
+   "Salt to taste",
+   "2 tbsp chopped coriander",
+   "1 tsp oil for the tawa",
+   "— Green chutney —",
+   "1 cup coriander and mint leaves",
+   "1 green chilli",
+   "1 tsp lemon juice",
+   "Salt",
+   "— To serve —",
+   "½ katori curd"
+  ],
+  "steps": [
+   "Grind the soaked dal with green chilli, hing, cumin and a little water into a thick, pourable batter.",
+   "Stir in coriander and salt.",
+   "Heat a non-stick tawa on medium heat and smear with a few drops of oil.",
+   "Pour a ladle of batter and spread it into a thin circle.",
+   "Cook 2-3 minutes until the edges lift and the base is golden, then flip and cook 1 minute.",
+   "Blend the chutney ingredients with a splash of water until smooth.",
+   "Serve 2 chillas hot with chutney and curd."
+  ],
+  "tips": "Crumble 2 tbsp paneer into the batter for roughly 4 g more protein."
+ },
+ "paneer_paratha_curd": {
+  "description": "Stuffed whole wheat flatbread with spiced crumbled paneer — rich in protein and very filling.",
+  "prep_time": "15 min",
+  "cook_time": "15 min",
+  "servings": 2,
+  "ingredients": [
+   "1.5 cups whole wheat flour",
+   "Water to knead",
+   "Salt to taste",
+   "— Filling —",
+   "150g paneer (crumbled)",
+   "½ tsp cumin powder",
+   "½ tsp chilli powder",
+   "2 tbsp chopped coriander",
+   "Salt to taste",
+   "1 cup curd for serving"
+  ],
+  "steps": [
+   "Knead wheat flour, salt and water into a soft dough. Rest 10 min.",
+   "Mix crumbled paneer with all spices and coriander. Set aside.",
+   "Divide dough into 2 balls. Roll each into a small circle.",
+   "Place 2–3 tbsp filling in centre, fold edges over and seal.",
+   "Gently roll again into a flat paratha (~6 inch).",
+   "Cook on a hot tawa with a little ghee/oil, flipping twice until golden.",
+   "Serve with cold curd and pickle."
+  ],
+  "tips": "Press the stuffed paratha gently with a spatula while cooking for even heat distribution."
+ },
+ "besan_cheela_chutney": {
+  "description": "Quick chickpea-flour pancakes — one of the fastest high-protein breakfasts you can make.",
+  "prep_time": "5 min",
+  "cook_time": "10 min",
+  "servings": 2,
+  "ingredients": [
+   "1 cup besan (chickpea flour)",
+   "½ cup water",
+   "¼ tsp turmeric",
+   "½ tsp ajwain (carom seeds)",
+   "1 green chilli (chopped)",
+   "2 tbsp chopped onion",
+   "2 tbsp chopped coriander",
+   "Salt to taste",
+   "— Green Chutney —",
+   "1 cup coriander leaves",
+   "2 green chillies",
+   "1 tbsp lemon juice",
+   "Salt + water"
+  ],
+  "steps": [
+   "Whisk besan, water, turmeric, ajwain, and salt into a smooth lump-free batter.",
+   "Fold in chopped onion, chilli, and coriander.",
+   "Heat a tawa, grease lightly, pour batter and spread thin.",
+   "Cook 2–3 min until bubbles form, flip and cook 1 min.",
+   "Blend all chutney ingredients until smooth.",
+   "Serve 2 cheelas with green chutney."
+  ],
+  "tips": "Add 2 tbsp curd to the batter for softer, fluffier cheelas."
+ },
+ "dal_tadka_thali": {
+  "description": "Everyday North Indian thali: toor dal with a cumin-garlic tadka, rotis, a dry mixed vegetable sabzi and salad.",
+  "prep_time": "15 min",
+  "cook_time": "30 min",
+  "servings": 2,
+  "ingredients": [
+   "¾ cup toor dal, rinsed",
+   "½ tsp turmeric",
+   "1 onion and 1 tomato, chopped",
+   "2 garlic cloves, 1 inch ginger",
+   "1 tsp cumin seeds, pinch of hing, 1 dry red chilli",
+   "1 tsp ghee or oil for the tadka",
+   "— Sabzi —",
+   "2 cups mixed vegetables (beans, carrot, peas, cauliflower)",
+   "½ tsp each: cumin, turmeric, coriander powder",
+   "1 tbsp oil",
+   "— Rotis —",
+   "1 cup whole wheat atta, water, pinch of salt",
+   "— Salad —",
+   "Cucumber, tomato, lemon juice, salt"
+  ],
+  "steps": [
+   "Pressure-cook the dal with turmeric and 2 cups water for 3-4 whistles. Whisk until smooth.",
+   "For the sabzi, heat oil, add cumin, then the vegetables and spices. Cover and cook 10-12 minutes until tender.",
+   "Knead atta with water and salt into a soft dough. Rest 10 minutes, then roll and cook rotis on a hot tawa.",
+   "For the tadka, heat ghee, add cumin, hing, red chilli, garlic and ginger, then onion and tomato. Cook 4-5 minutes.",
+   "Pour the tadka into the dal and simmer 3 minutes.",
+   "Serve dal, 2 rotis, sabzi and salad per plate."
+  ],
+  "tips": "A squeeze of lemon on the dal helps your body absorb its iron."
+ },
+ "rajma_chawal": {
+  "description": "North India's favourite comfort food — kidney beans over rice with cooling raita. High protein, high fibre.",
+  "prep_time": "8 hr soak + 15 min",
+  "cook_time": "35 min",
+  "servings": 2,
+  "ingredients": [
+   "1 cup rajma (soaked overnight)",
+   "1 cup basmati or rice (white or brown)",
+   "2 onions (puréed)",
+   "3 tomatoes (puréed)",
+   "1 tsp ginger-garlic paste",
+   "1 tsp cumin",
+   "1 tsp coriander",
+   "½ tsp chilli powder",
+   "1 tsp garam masala",
+   "2 tbsp oil",
+   "Salt to taste",
+   "— Raita —",
+   "1 cup curd",
+   "1 cucumber (grated)",
+   "cumin powder, salt"
+  ],
+  "steps": [
+   "Pressure cook soaked rajma with salt and water (6–7 whistles) until soft.",
+   "Cook rice separately.",
+   "Heat oil in a kadhai. Add cumin, then onion purée — cook 10 min until golden.",
+   "Add ginger-garlic paste, cook 2 min. Add tomato purée + all spices, cook 10 min.",
+   "Add cooked rajma with some cooking water. Simmer 10 min until thick.",
+   "Whisk curd with grated cucumber, cumin powder and salt for raita.",
+   "Serve rajma over rice with raita on the side."
+  ],
+  "tips": "Use an Instant Pot to skip overnight soaking — pressure cook dry rajma for 45 min."
+ },
+ "palak_paneer_roti": {
+  "description": "Classic spinach-paneer curry — iron from spinach + protein from paneer = one of the most nutritious vegetarian curries.",
+  "prep_time": "10 min",
+  "cook_time": "25 min",
+  "servings": 2,
+  "ingredients": [
+   "200g paneer (cubed)",
+   "2 large bunches spinach (blanched)",
+   "1 onion",
+   "2 tomatoes",
+   "1 tsp ginger-garlic paste",
+   "½ tsp cumin",
+   "¼ tsp nutmeg",
+   "1 tsp garam masala",
+   "2 tbsp cream or cashew paste (optional)",
+   "2 tbsp oil",
+   "Salt",
+   "4 whole wheat rotis",
+   "½ cup any dal (cooked, for the side)"
+  ],
+  "steps": [
+   "Blanch spinach in boiling water 2 min, then transfer to ice water. Blend smooth.",
+   "Fry paneer cubes lightly in 1 tsp oil until golden. Set aside.",
+   "In same pan, heat oil. Add cumin, then diced onion — sauté 8 min.",
+   "Add ginger-garlic paste + tomatoes, cook 8 min until oil separates.",
+   "Add spinach purée + all spices, mix well and simmer 5 min.",
+   "Add paneer, fold in gently. Simmer 3 min. Stir in cream if using.",
+   "Serve with warm rotis and a small bowl of dal."
+  ],
+  "tips": "Blanching and ice-bathing spinach keeps the gravy bright green and preserves nutrients."
+ },
+ "khichdi_curd": {
+  "description": "India's original one-pot comfort food — easily digestible, balanced macros, and very soothing.",
+  "prep_time": "10 min",
+  "cook_time": "25 min",
+  "servings": 2,
+  "ingredients": [
+   "½ cup moong dal",
+   "½ cup rice",
+   "1 cup mixed vegetables (peas, carrot, beans)",
+   "1 tsp cumin",
+   "½ tsp turmeric",
+   "1 tsp ginger (grated)",
+   "1 bay leaf",
+   "2 cloves",
+   "1 tsp ghee",
+   "Salt to taste",
+   "1 cup curd for serving"
+  ],
+  "steps": [
+   "Wash and soak rice + moong dal together 20 min.",
+   "Heat ghee in a pressure cooker. Add bay leaf, cloves, cumin — let splutter.",
+   "Add ginger, sauté 1 min. Add vegetables, turmeric and salt.",
+   "Add drained rice + dal, mix well. Add 3.5 cups water.",
+   "Pressure cook 3 whistles on medium heat.",
+   "Let pressure release naturally. Adjust consistency with hot water.",
+   "Serve with cold curd."
+  ],
+  "tips": "Add 1 tbsp lemon juice after cooking for a flavour boost without extra calories."
+ },
+ "paneer_bhurji_roti": {
+  "description": "Scrambled spiced paneer — the vegetarian answer to scrambled eggs. Fast, high protein, very satisfying.",
+  "prep_time": "5 min",
+  "cook_time": "15 min",
+  "servings": 2,
+  "ingredients": [
+   "250g paneer (crumbled)",
+   "1 onion (finely chopped)",
+   "2 tomatoes (chopped)",
+   "1 capsicum (chopped)",
+   "1 tsp cumin",
+   "½ tsp turmeric",
+   "1 tsp chilli powder",
+   "½ tsp garam masala",
+   "2 tbsp oil",
+   "Salt + coriander to garnish",
+   "4 whole wheat rotis"
+  ],
+  "steps": [
+   "Heat oil, add cumin. Once it splutters, add onion and sauté 5 min.",
+   "Add capsicum, cook 2 min. Add tomatoes + all spices, cook until soft.",
+   "Crumble in paneer, fold gently. Cook 3–4 min — don't over-mix.",
+   "Garnish with coriander. Serve with warm rotis and a simple cucumber-tomato salad."
+  ],
+  "tips": "Soak packaged paneer in warm water 10 min before using to make it softer."
+ },
+ "chole_brown_rice": {
+  "description": "Spiced chickpea curry — one of the best plant-based protein sources with complex flavour from whole spices.",
+  "prep_time": "8 hr soak + 10 min",
+  "cook_time": "30 min",
+  "servings": 2,
+  "ingredients": [
+   "1 cup kabuli chana (soaked overnight)",
+   "1 cup rice (white or brown)",
+   "2 onions (finely chopped)",
+   "3 tomatoes (puréed)",
+   "1 tsp ginger-garlic paste",
+   "1 tsp chana masala powder",
+   "1 tsp coriander",
+   "½ tsp cumin",
+   "½ tsp amchur (dry mango)",
+   "2 tbsp oil",
+   "Salt + coriander leaves"
+  ],
+  "steps": [
+   "Pressure cook soaked chana with salt and water — 5 whistles.",
+   "Cook brown rice separately.",
+   "Heat oil, add cumin. Add onions, fry 10 min until deep golden.",
+   "Add ginger-garlic paste, fry 2 min. Add tomato purée + all spices.",
+   "Cook masala 10 min until oil separates.",
+   "Add cooked chana + some cooking water. Simmer 10–12 min.",
+   "Garnish with coriander and a squeeze of lemon. Serve with brown rice."
+  ],
+  "tips": "Amchur (dry mango powder) gives that signature tangy punch — don't skip it."
+ },
+ "oats_pb": {
+  "description": "Simple, fast and highly effective — complex carbs + banana sugar + peanut butter protein for sustained energy.",
+  "prep_time": "2 min",
+  "cook_time": "5 min",
+  "servings": 1,
+  "ingredients": [
+   "½ cup rolled oats",
+   "1 cup milk (or water)",
+   "1 ripe banana",
+   "2 tbsp peanut butter",
+   "1 tsp jaggery powder (optional)",
+   "Pinch of cinnamon"
+  ],
+  "steps": [
+   "Add oats and milk to a saucepan. Cook on medium heat 3–4 min, stirring.",
+   "Pour into a bowl. Top with sliced banana.",
+   "Add peanut butter on top — it melts slightly from the heat.",
+   "Drizzle jaggery and sprinkle cinnamon."
+  ],
+  "tips": "Overnight version: soak oats in milk overnight in the fridge. Add toppings in the morning — zero cooking required."
+ },
+ "sprouts_chaat_snack": {
+  "description": "No-cook high-protein snack — sprouted moong are nutritionally superior to cooked, with extra vitamin C.",
+  "prep_time": "5 min",
+  "cook_time": "0 min",
+  "servings": 1,
+  "ingredients": [
+   "1 cup mixed sprouts (moong + chana)",
+   "1 small tomato (chopped)",
+   "½ cucumber (chopped)",
+   "1 small onion (finely chopped)",
+   "1 green chilli (optional)",
+   "1 tbsp lemon juice",
+   "Chaat masala + salt to taste",
+   "Coriander leaves to garnish"
+  ],
+  "steps": [
+   "If using raw sprouts, microwave or steam 2 min for safety.",
+   "Mix all chopped vegetables with sprouts.",
+   "Add lemon juice, chaat masala and salt.",
+   "Toss well and garnish with coriander."
+  ],
+  "tips": "Grow your own sprouts: soak moong dal overnight, drain, keep in a wet cloth 24–36 hrs. Free protein!"
+ },
+ "yogurt_almonds": {
+  "description": "Effortless high-protein snack — Greek yogurt has nearly 2x the protein of regular curd.",
+  "prep_time": "2 min",
+  "cook_time": "0 min",
+  "servings": 1,
+  "ingredients": [
+   "150g Greek yogurt (plain)",
+   "1 tsp jaggery powder",
+   "10 almonds or walnuts (roughly chopped)",
+   "Pinch of cinnamon"
+  ],
+  "steps": [
+   "Spoon Greek yogurt into a bowl.",
+   "Drizzle jaggery on top.",
+   "Add chopped nuts and a pinch of cinnamon.",
+   "Eat immediately or refrigerate up to 2 hours."
+  ],
+  "tips": "Make your own Greek yogurt: hang regular curd in a muslin cloth 2–3 hours to drain whey. Same protein, half the cost."
+ },
+ "chana_chai": {
+  "description": "The simplest high-protein Indian snack — roasted Bengal gram is one of the best protein-per-rupee foods.",
+  "prep_time": "1 min",
+  "cook_time": "5 min",
+  "servings": 1,
+  "ingredients": [
+   "50g roasted Bengal gram (ready-to-eat)",
+   "Chaat masala (optional)",
+   "Salt if needed",
+   "— Masala Chai —",
+   "1 cup water",
+   "½ cup milk",
+   "1 tsp tea leaves",
+   "½ inch ginger",
+   "2 cardamom pods",
+   "1 tsp sugar"
+  ],
+  "steps": [
+   "The chana needs no cooking — pour into a bowl and add chaat masala.",
+   "For chai: boil water with ginger and crushed cardamom.",
+   "Add tea leaves, boil 1 min. Add milk and sugar, boil 2 more min.",
+   "Strain and serve alongside the chana."
+  ],
+  "tips": "50g roasted chana = 10–11g protein for under ₹10. Best value protein snack in India."
+ },
+ "idli_sambar": {
+  "description": "South India's iconic breakfast — fermented batter idlis with lentil sambar. Light yet nutritious.",
+  "prep_time": "12 hr fermentation",
+  "cook_time": "20 min",
+  "servings": 2,
+  "ingredients": [
+   "2 cups idli rice + 1 cup urad dal (soaked and blended, fermented 8–12 hrs)",
+   "— Sambar —",
+   "½ cup toor dal",
+   "1 tomato",
+   "½ tsp tamarind paste",
+   "1 tsp sambar powder",
+   "¼ tsp mustard + curry leaves",
+   "1 tbsp oil",
+   "— Coconut Chutney —",
+   "½ cup grated coconut",
+   "1 green chilli",
+   "1 tbsp roasted chana dal",
+   "Salt + water"
+  ],
+  "steps": [
+   "Blend soaked urad dal smooth. Mix with ground rice batter. Add salt and ferment 8–12 hrs.",
+   "Pour batter into greased idli moulds, steam 10–12 min.",
+   "For sambar: pressure cook toor dal. Prepare tadka of mustard, curry leaves, tomato + sambar powder. Mix with dal + tamarind. Simmer 8 min.",
+   "Blend coconut, chilli, chana dal and salt with water for chutney.",
+   "Serve 3 idlis with sambar and chutney."
+  ],
+  "tips": "Use instant idli mix if fermentation feels like too much effort — still a healthy breakfast!"
+ },
+ "quinoa_chole_bowl": {
+  "description": "Quinoa topped with chole cooked without onion or garlic, and a crunchy cucumber-tomato salad.",
+  "prep_time": "10 min (+ overnight soak)",
+  "cook_time": "25 min",
+  "servings": 1,
+  "ingredients": [
+   "⅓ cup quinoa, rinsed well",
+   "1 cup cooked kabuli chana (soaked overnight, pressure-cooked)",
+   "1 tomato, pureed",
+   "½ tsp cumin seeds",
+   "Pinch of hing",
+   "½ tsp each: chana masala, coriander powder, red chilli powder",
+   "1 tsp oil",
+   "— Salad —",
+   "1 small cucumber, chopped",
+   "1 tomato, chopped",
+   "Lemon juice, salt and chaat masala"
+  ],
+  "steps": [
+   "Cook the quinoa in ⅔ cup water for about 15 minutes until the water is absorbed. Rest 5 minutes and fluff.",
+   "Heat oil, add cumin and hing, then the tomato puree and spices. Cook until the oil separates.",
+   "Add the chana and ½ cup water. Simmer 8-10 minutes, mashing a few chickpeas to thicken.",
+   "Toss cucumber and tomato with lemon, salt and chaat masala.",
+   "Spoon quinoa into a bowl, top with chole and salad."
+  ],
+  "tips": "Rinse quinoa thoroughly before cooking to remove its bitter coating."
+ },
+ "tofu_quinoa": {
+  "description": "High-protein tofu with nutty quinoa and stir-fried vegetables — fast, colourful, and filling.",
+  "prep_time": "10 min",
+  "cook_time": "20 min",
+  "servings": 1,
+  "ingredients": [
+   "200g firm tofu (pressed, cubed)",
+   "½ cup quinoa",
+   "1 cup mixed vegetables (capsicum, broccoli, peas, carrot)",
+   "2 tbsp soy sauce",
+   "1 tsp sesame oil",
+   "1 tsp ginger-garlic paste",
+   "1 tbsp oil",
+   "Spring onions + sesame seeds to garnish"
+  ],
+  "steps": [
+   "Press tofu between paper towels 10 min to remove moisture. Cut into cubes.",
+   "Cook quinoa in 1 cup water, 15 min.",
+   "Heat oil in a wok on high heat. Add tofu and fry until golden on all sides.",
+   "Push tofu aside. Add ginger-garlic, then vegetables. Stir-fry 3–4 min on high.",
+   "Add soy sauce and sesame oil. Toss everything together.",
+   "Serve over quinoa, garnish with spring onions and sesame."
+  ],
+  "tips": "For crispier tofu: dust with cornflour before frying, or bake at 200°C for 20 min."
+ }
+}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Account{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Account</h1><p>{{ current_user.email }}</p></div></div>
+<div class="grid grid-2">
+  <section class="panel">
+    <h2>Your plan</h2>
+    {% if current_user.is_paid %}
+      <p><strong>{{ current_plan.name }}</strong> until {{ current_user.plan_expires_at.strftime('%d %B %Y') }}. It won't renew automatically.</p>
+      <a class="btn" style="margin-top:.75rem" href="{{ url_for('billing.pricing') }}">Add more time</a>
+    {% else %}
+      <p><strong>Free</strong>. Upgrade for full-week plans, budget and vrat planning, and all nutrients.</p>
+      <a class="btn btn-primary" style="margin-top:.75rem" href="{{ url_for('billing.pricing') }}">See plans</a>
+    {% endif %}
+    {% if payments %}
+    <h3 style="margin-top:1.25rem">Payments</h3>
+    <div class="scroll-x"><table>
+      <thead><tr><th>Date</th><th>Plan</th><th class="r">Amount</th><th>Status</th></tr></thead>
+      <tbody>{% for pay in payments %}<tr><td>{{ pay.created_at.strftime('%d %b %Y') }}</td><td>{{ pay.plan|title }}, {{ pay.period }}</td><td class="r num">{{ pay.amount_paise|inr }}</td><td>{{ {'paid':'Paid','created':'Not completed','failed':'Failed'}[pay.status] }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h2>Change password</h2>
+    <form method="post" action="{{ url_for('account.change_password') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field"><label for="current">Current password</label><input id="current" name="current" type="password" autocomplete="current-password" required></div>
+      <div class="field"><label for="new">New password</label><input id="new" name="new" type="password" autocomplete="new-password" minlength="8" required></div>
+      <button class="btn" type="submit">Change password</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Emails</h2>
+    <form method="post" action="{{ url_for('account.preferences') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field"><label class="check"><input type="checkbox" name="marketing" {% if current_user.marketing_opt_in %}checked{% endif %}><span>Recipes and festival meal plans, now and then</span></label></div>
+      <button class="btn" type="submit">Save email preferences</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Your data</h2>
+    <p class="muted">Download everything we hold about you, or delete your account.</p>
+    <a class="btn" style="margin:.75rem 0 1.25rem" href="{{ url_for('account.export') }}">Download my data</a>
+    <form method="post" action="{{ url_for('account.delete') }}" data-confirm="This permanently deletes your account, logs and plans. Continue?">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field"><label for="del-pw">Confirm with your password</label><input id="del-pw" name="password" type="password" autocomplete="current-password" required></div>
+      <button class="btn btn-danger" type="submit">Delete my account</button>
+    </form>
+    <p class="hint" style="margin-top:.75rem">Payment records are kept without your name for tax purposes, as the law requires.</p>
+  </section>
+</div>
+{% endblock %}

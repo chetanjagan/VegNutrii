@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Family kitchen{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Family kitchen</h1>
+    <p>Cook today's plan once. Here's how much each person should take.</p>
+  </div>
+</div>
+
+<section class="panel">
+  <h2>Today's portions</h2>
+  {% if shares %}
+  <div class="scroll-x"><table>
+    <thead><tr><th>Meal</th><th class="r">You</th>{% for m, s in shares %}<th class="r">{{ m.name }}</th>{% endfor %}</tr></thead>
+    <tbody>
+      {% for slot, meal in plan.meals.items() %}
+      <tr><td>{{ meal.name }}<br><small class="muted">{{ slot_labels[slot] }}</small></td>
+        <td class="r num">1×</td>
+        {% for m, s in shares %}<td class="r num">{{ s }}×</td>{% endfor %}</tr>
+      {% endfor %}
+      <tr><td><strong>Daily need</strong></td><td class="r num">{{ p.daily_calories|num }} kcal</td>{% for m, s in shares %}<td class="r num">{{ m.daily_calories|num }} kcal</td>{% endfor %}</tr>
+    </tbody>
+  </table></div>
+  <p class="hint" style="margin-top:.75rem">"1×" is your plate as planned. 0.7× means about two-thirds of that, 1.3× a third more. Children's needs use ICMR-NIN reference values; ask your paediatrician about any specific concerns.</p>
+  {% else %}
+  <p class="muted">Add family members below and their portions appear here.</p>
+  {% endif %}
+</section>
+
+<div class="grid grid-2" style="margin-top:1rem">
+  <section class="panel">
+    <h2>Family members</h2>
+    {% if members %}
+    <div class="divided">
+      {% for m in members %}
+      <div class="list-row">
+        <span><strong>{{ m.name }}</strong><br><small class="muted">{{ m.age }} yrs, {{ m.daily_calories|num }} kcal and {{ m.daily_protein }} g protein a day</small></span>
+        <form method="post" action="{{ url_for('planner.delete_member', member_id=m.id) }}" data-confirm="Remove {{ m.name }}?">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm btn-quiet btn-danger" type="submit">Remove</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}<p class="muted">No one added yet.</p>{% endif %}
+    <p class="muted" style="margin-top:.75rem">{{ members|length }} of {{ max_members }} places used.</p>
+  </section>
+
+  {% if members|length < max_members %}
+  <section class="panel">
+    <h2>Add someone</h2>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field"><label for="f-name">Name</label><input id="f-name" name="name" maxlength="60" required></div>
+      <div class="fields">
+        <div class="field"><label for="f-age">Age</label><input id="f-age" name="age" type="number" min="2" max="100" required></div>
+        <div class="field"><label for="f-h">Height (cm)</label><input id="f-h" name="height" type="number" min="60" max="230" step="0.5" required></div>
+        <div class="field"><label for="f-w">Weight (kg)</label><input id="f-w" name="weight" type="number" min="10" max="300" step="0.1" required></div>
+      </div>
+      <div class="fields">
+        <div class="field"><label for="f-g">Sex</label><select id="f-g" name="gender"><option value="female">Female</option><option value="male">Male</option></select></div>
+        <div class="field"><label for="f-a">Activity</label><select id="f-a" name="activity_level"><option value="sedentary">Mostly sitting</option><option value="light" selected>Lightly active</option><option value="moderate">Moderately active</option><option value="active">Very active</option></select></div>
+        <div class="field"><label for="f-goal">Goal</label><select id="f-goal" name="goal"><option value="maintenance">Maintain</option><option value="fat_loss">Lose fat</option><option value="muscle_gain">Build muscle</option></select></div>
+      </div>
+      <p class="hint" style="margin-bottom:1rem">Under-18s are always planned to maintain, never to lose weight.</p>
+      <button class="btn btn-primary" type="submit">Add to family</button>
+    </form>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

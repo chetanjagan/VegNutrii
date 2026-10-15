@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% from "_macros.html" import thali, pct, icon %}
+{% block title %}Today{% endblock %}
+{% block content %}
+{% set pro_left = [p.daily_protein - totals.protein, 0]|max %}
+<div class="page-head">
+  <div>
+    <h1>Hello, {{ current_user.username }}</h1>
+    <p>{{ today.strftime('%A, %d %B') }}{% if plan and plan.fasting %}. A vrat day: your plan uses fasting foods.{% endif %}</p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('tracker.log_meal') }}">{{ icon('log') }}Log food</a>
+</div>
+
+<section class="panel thali-wrap" aria-labelledby="today-h">
+  {{ thali([
+      ('k-cal', totals.kcal|num, 'kcal', pct(totals.kcal, p.daily_calories)),
+      ('k-pro', (totals.protein|round|int) ~ ' g', 'protein', pct(totals.protein, p.daily_protein)),
+      ('k-water', ((water/1000)|round(1)) ~ ' L', 'water', pct(water, p.water_goal_ml)),
+      ('k-iron', (totals.iron|round|int) ~ ' mg', 'iron', pct(totals.iron, iron_target)),
+    ], (pro_left|round|int) ~ ' g', 'protein to go',
+    'Today: ' ~ (totals.kcal|num) ~ ' of ' ~ p.daily_calories ~ ' kcal, ' ~ (totals.protein|round|int) ~ ' of ' ~ p.daily_protein ~ ' g protein') }}
+  <div class="legend">
+    <h2 id="today-h">Today's plate</h2>
+    {% for cls, label, val, target, unit in [('cal','Calories', totals.kcal, p.daily_calories, 'kcal'), ('pro','Protein', totals.protein, p.daily_protein, 'g'), ('water','Water', water, p.water_goal_ml, 'ml'), ('iron','Iron', totals.iron, iron_target, 'mg')] %}
+    <div class="legend-item">
+      <span class="dot {{ cls }}"></span>
+      <span>{{ label }}</span>
+      <span class="num">{{ val|num }}{% if cls == 'water' %}{% endif %} / {{ target|num }} {{ unit }}</span>
+      <div class="bar {% if cls == 'water' %}water{% elif cls == 'cal' %}turmeric{% elif cls == 'iron' %}low{% endif %}"><span {% if cls == 'water' %}data-water-bar{% endif %} style="width:{{ pct(val, target) }}%"></span></div>
+    </div>
+    {% endfor %}
+    <div class="row">
+      <span class="muted">Add water</span>
+      <button type="button" class="btn btn-sm" data-water="250">+250 ml</button>
+      <button type="button" class="btn btn-sm" data-water="500">+500 ml</button>
+    </div>
+  </div>
+</section>
+
+<div class="grid grid-2" style="margin-top:1rem">
+  <section class="panel">
+    <div class="panel-head"><h2>Today's plan</h2><a href="{{ url_for('planner.meal_plan') }}">Full week</a></div>
+    {% if plan %}
+    <div class="divided">
+      {% for slot, m in plan.meals.items() %}
+      <div class="meal">
+        <span class="slot">{{ {'breakfast':'Breakfast','lunch':'Lunch','snack':'Snack','dinner':'Dinner','extra':'Extra snack'}[slot] }}{% if plan.scale != 1 %}, {{ plan.scale }}× portion{% endif %}</span>
+        <span class="name"><a href="{{ url_for('planner.recipe', meal_key=m.key) }}">{{ m.name }}</a></span>
+        <span class="macros">{{ m.kcal|num }} kcal, {{ m.protein|num }} g protein</span>
+        <form class="actions" method="post" action="{{ url_for('planner.log_planned', day=today.isoformat(), slot=slot) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm" type="submit" aria-label="Log {{ m.name }} as eaten">{{ icon('check') }}Ate this</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="muted">No plan for today yet.</p>
+    <a class="btn btn-primary" style="margin-top:.75rem" href="{{ url_for('planner.meal_plan') }}">Plan my week</a>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>Protein this week</h2><span class="muted">Target {{ p.daily_protein }} g</span></div>
+    <div style="height:220px"><canvas data-chart='{{ {"type":"bar","labels":labels,"series":[{"label":"Protein (g)","data":protein7,"color":"leaf"},{"label":"Target","data":[p.daily_protein]*7,"type":"line","color":"turmeric","dashed":true}]}|tojson|forceescape }}' aria-label="Protein eaten each day this week"></canvas></div>
+    <p style="margin-top:.75rem">{% if streak.current %}<strong>{{ streak.current }}-day streak.</strong> You've reached 80% of your protein {{ streak.current }} day{{ 's' if streak.current != 1 }} in a row.{% else %}Reach 80% of your protein today to start a streak.{% endif %}</p>
+  </section>
+</div>
+
+<div class="grid grid-2" style="margin-top:1rem">
+  <section class="panel">
+    <div class="panel-head"><h2>Eaten today</h2><a href="{{ url_for('tracker.log_meal') }}">Add</a></div>
+    {% if logs %}
+    <div class="divided">
+      {% for l in logs %}
+      <div class="list-row"><span>{{ l.name }}<br><small class="muted">{{ l.meal_type|title }}</small></span><span class="num">{{ l.calories|num }} kcal<br><small class="muted">{{ l.protein|num(1) }} g protein</small></span></div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="muted">Nothing logged yet. Tap "Ate this" on a planned meal, or search for any food.</p>
+    {% endif %}
+  </section>
+  <section class="panel">
+    <h2>Worth knowing</h2>
+    <p>{{ tip.tip }}</p>
+    {% if not current_user.is_paid %}
+    <p class="notice" style="margin-top:1rem"><strong>Track calcium, B12 and zinc too.</strong>Pro adds full nutrient tracking, budget plans and vrat days. <a href="{{ url_for('billing.pricing') }}">See Pro</a></p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='vendor/chart-4.4.0.umd.js') }}"></script>{% endblock %}

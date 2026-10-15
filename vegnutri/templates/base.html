@@ -1,0 +1,102 @@
+{% from "_macros.html" import icon, logo, flashes %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}{{ app_name }}{% endblock %}{% if self.title() != app_name %} | {{ app_name }}{% endif %}</title>
+  <meta name="description" content="{% block description %}Meal plans and tracking built for Indian vegetarians: Jain, sattvic, vegan, eggetarian and vrat days.{% endblock %}">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="theme-color" content="#1e4d3b">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="{{ url_for('static', filename='icons/favicon.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+  <link rel="preload" href="{{ url_for('static', filename='fonts/bricolage-grotesque-latin-800-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script nonce="{{ csp_nonce() }}">try{var t=localStorage.getItem("vn-theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+{% if current_user.is_authenticated and not public_layout %}
+  {% set ep = request.endpoint or '' %}
+  <aside class="rail" aria-label="Main navigation">
+    <a class="brand" href="{{ url_for('tracker.dashboard') }}">{{ logo() }}<span>{{ app_name }}</span></a>
+    <nav>
+      {% for endpoint, label, ic in [('tracker.dashboard','Today','today'),('planner.meal_plan','Meal plan','plan'),('tracker.log_meal','Log food','log'),('coach.page','Coach','coach'),('planner.grocery','Grocery list','grocery')] %}
+      <a href="{{ url_for(endpoint) }}" {% if ep == endpoint %}aria-current="page"{% endif %}>{{ icon(ic) }}{{ label }}</a>
+      {% endfor %}
+      <div class="group">Track</div>
+      {% for endpoint, label, ic in [('tracker.nutrients','Nutrients','nutrients'),('tracker.progress','Weight and progress','progress'),('tracker.water','Water','water'),('tracker.calendar','Calendar','calendar'),('tracker.mood','Mood','mood'),('tracker.achievements','Milestones','badges')] %}
+      <a href="{{ url_for(endpoint) }}" {% if ep == endpoint %}aria-current="page"{% endif %}>{{ icon(ic) }}{{ label }}</a>
+      {% endfor %}
+      <div class="group">Kitchen</div>
+      <a href="{{ url_for('tracker.my_foods') }}" {% if ep == 'tracker.my_foods' %}aria-current="page"{% endif %}>{{ icon('foods') }}My foods</a>
+      <a href="{{ url_for('planner.family') }}" {% if ep == 'planner.family' %}aria-current="page"{% endif %}>{{ icon('family') }}Family kitchen</a>
+      <div class="group">You</div>
+      <a href="{{ url_for('account.settings') }}" {% if ep.startswith('account.') %}aria-current="page"{% endif %}>{{ icon('account') }}Account</a>
+      <a href="{{ url_for('tracker.onboarding') }}" {% if ep == 'tracker.onboarding' %}aria-current="page"{% endif %}>{{ icon('today') }}Targets and diet</a>
+      {% if current_user.is_admin %}<a href="{{ url_for('admin.index') }}">{{ icon('admin') }}Admin</a>{% endif %}
+      <button type="button" class="link" data-action="theme">{{ icon('theme') }}Light or dark</button>
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="link">{{ icon('logout') }}Log out</button>
+      </form>
+    </nav>
+    <div class="plan-chip">
+      {% if current_user.is_paid %}
+        {{ current_plan.name }} plan until {{ current_user.plan_expires_at.strftime('%d %b %Y') }}
+      {% else %}
+        Free plan. <a href="{{ url_for('billing.pricing') }}">See Pro</a>
+      {% endif %}
+    </div>
+  </aside>
+
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('tracker.dashboard') }}">{{ logo() }}<span>{{ app_name }}</span></a>
+    <button type="button" class="btn btn-quiet btn-sm" data-action="theme" aria-label="Switch light or dark">{{ icon('theme') }}</button>
+  </header>
+
+  <main class="main" id="main">
+    {{ flashes() }}
+    {% block content %}{% endblock %}
+  </main>
+
+  <nav class="tabbar" aria-label="Quick navigation">
+    {% for endpoint, label, ic in [('tracker.dashboard','Today','today'),('planner.meal_plan','Plan','plan'),('tracker.log_meal','Log','log'),('coach.page','Coach','coach')] %}
+    <a href="{{ url_for(endpoint) }}" {% if ep == endpoint %}aria-current="page"{% endif %}>{{ icon(ic) }}{{ label }}</a>
+    {% endfor %}
+    <button type="button" data-action="menu">{{ icon('more') }}More</button>
+  </nav>
+{% else %}
+  <header class="site-head">
+    <a class="brand" href="{{ url_for('main.index') }}">{{ logo() }}<span>{{ app_name }}</span></a>
+    <nav>
+      <a class="btn btn-quiet hide-sm" href="{{ url_for('billing.pricing') }}">Pricing</a>
+      {% if current_user.is_authenticated %}
+        <a class="btn btn-primary" href="{{ url_for('tracker.dashboard') }}">Open app</a>
+      {% else %}
+        <a class="btn btn-quiet" href="{{ url_for('auth.login') }}">Log in</a>
+        <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Start free</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main class="site-main" id="main">
+    {{ flashes() }}
+    {% block public %}{% endblock %}
+  </main>
+  <footer class="site-foot">
+    <div class="inner">
+      <span>© {{ year }} {{ company_name }}. Nutrition guidance, not medical advice.</span>
+      <nav aria-label="Legal">
+        <a href="{{ url_for('main.privacy') }}">Privacy</a>
+        <a href="{{ url_for('main.terms') }}">Terms</a>
+        <a href="{{ url_for('main.refunds') }}">Refunds</a>
+        <a href="{{ url_for('main.disclaimer') }}">Health disclaimer</a>
+        <a href="mailto:{{ support_email }}">Contact</a>
+      </nav>
+    </div>
+  </footer>
+{% endif %}
+{% block scripts %}{% endblock %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

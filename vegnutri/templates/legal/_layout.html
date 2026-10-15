@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% set public_layout = true %}
+{% block public %}
+<article class="legal" style="padding-top:1.5rem">
+  {% block legal %}{% endblock %}
+  <p class="faint" style="margin-top:2rem">Last updated: {% block updated %}15 October 2026{% endblock %}. Questions: <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+</article>
+{% endblock %}

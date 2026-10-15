@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% from "_macros.html" import pct %}
+{% block title %}Log food{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Log food</h1>
+    <p>{{ day.strftime('%A %d %B') }}: <span class="num">{{ totals.kcal|num }}</span> of {{ p.daily_calories|num }} kcal, <span class="num">{{ totals.protein|num }}</span> of {{ p.daily_protein }} g protein.</p>
+  </div>
+  <div class="row">
+    <a class="btn btn-sm" href="{{ url_for('tracker.log_meal', d=prev_day.isoformat()) }}">Previous day</a>
+    {% if next_day > day %}<a class="btn btn-sm" href="{{ url_for('tracker.log_meal', d=next_day.isoformat()) }}">Next day</a>{% endif %}
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <section class="panel">
+    <h2>Add food</h2>
+    <form method="post" id="log-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="source" id="source" value="food">
+      <input type="hidden" name="food_key" id="food_key">
+      <input type="hidden" name="custom_id" id="custom_id">
+      <input type="hidden" name="log_date" value="{{ day.isoformat() }}">
+      <div class="field search">
+        <label for="food-search">Search Indian foods and your own dishes</label>
+        <input id="food-search" type="search" autocomplete="off" placeholder="Try dal, idli, paneer, chana" aria-controls="food-results">
+        <div class="results" id="food-results" hidden></div>
+      </div>
+      <div class="picked" id="picked" hidden><strong id="picked-name"></strong><br><small class="muted" id="picked-meta"></small></div>
+      <div class="fields">
+        <div class="field"><label for="servings">Servings</label><input id="servings" name="servings" type="number" inputmode="decimal" min="0.25" max="10" step="0.25" value="1"></div>
+        <div class="field"><label for="meal_type">Meal</label>
+          <select id="meal_type" name="meal_type">{% for t in meal_types %}<option value="{{ t }}">{{ t|title }}</option>{% endfor %}</select></div>
+      </div>
+      <button class="btn btn-primary" type="submit">Log it</button>
+    </form>
+
+    <details style="margin-top:1rem">
+      <summary>Enter it yourself</summary>
+      <form method="post" style="margin-top:.75rem">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="source" value="manual">
+        <input type="hidden" name="log_date" value="{{ day.isoformat() }}">
+        <div class="field"><label for="m-name">What did you eat?</label><input id="m-name" name="name" maxlength="200" required></div>
+        <div class="fields">
+          <div class="field"><label for="m-kcal">Calories</label><input id="m-kcal" name="calories" type="number" min="0" max="5000" required></div>
+          <div class="field"><label for="m-pro">Protein (g)</label><input id="m-pro" name="protein" type="number" step="0.1" min="0" max="300" value="0"></div>
+          <div class="field"><label for="m-carbs">Carbs (g)</label><input id="m-carbs" name="carbs" type="number" step="0.1" min="0" value="0"></div>
+          <div class="field"><label for="m-fat">Fat (g)</label><input id="m-fat" name="fat" type="number" step="0.1" min="0" value="0"></div>
+        </div>
+        <div class="field"><label for="m-type">Meal</label><select id="m-type" name="meal_type">{% for t in meal_types %}<option value="{{ t }}">{{ t|title }}</option>{% endfor %}</select></div>
+        <button class="btn" type="submit">Log it</button>
+      </form>
+    </details>
+    {% if customs %}<p class="muted" style="margin-top:1rem">Your saved dishes show up in search. <a href="{{ url_for('tracker.my_foods') }}">Manage my foods</a></p>{% endif %}
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>Logged</h2><span class="muted num">{{ logs|length }} item{{ 's' if logs|length != 1 }}</span></div>
+    {% if logs %}
+    <div class="scroll-x"><table>
+      <thead><tr><th>Food</th><th class="r">kcal</th><th class="r">Protein</th><th><span class="sr-only">Remove</span></th></tr></thead>
+      <tbody>
+      {% for l in logs %}
+      <tr>
+        <td>{{ l.name }}<br><small class="muted">{{ l.meal_type|title }}{% if l.servings != 1 %}, {{ l.servings|num(2)|replace('.00','') }} servings{% endif %}</small></td>
+        <td class="r num">{{ l.calories|num }}</td>
+        <td class="r num">{{ l.protein|num(1) }} g</td>
+        <td class="r"><form method="post" action="{{ url_for('tracker.delete_log', log_id=l.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm btn-quiet btn-danger" type="submit" aria-label="Remove {{ l.name }}">Remove</button></form></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <div style="margin-top:1rem" class="stack">
+      <div><div class="row between"><span>Protein</span><span class="num">{{ totals.protein|num }} / {{ p.daily_protein }} g</span></div><div class="bar"><span style="width:{{ pct(totals.protein, p.daily_protein) }}%"></span></div></div>
+      <div><div class="row between"><span>Calories</span><span class="num">{{ totals.kcal|num }} / {{ p.daily_calories|num }}</span></div><div class="bar turmeric"><span style="width:{{ pct(totals.kcal, p.daily_calories) }}%"></span></div></div>
+      <div><div class="row between"><span>Fibre</span><span class="num">{{ totals.fiber|num }} g</span></div></div>
+    </div>
+    {% else %}
+    <p class="muted">Nothing logged for this day. Search for a food, or log a planned meal from <a href="{{ url_for('planner.meal_plan') }}">your plan</a>.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

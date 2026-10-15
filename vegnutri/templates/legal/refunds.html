@@ -1,0 +1,14 @@
+{% extends "legal/_layout.html" %}
+{# TEMPLATE: confirm this matches your business policy before launch. #}
+{% block title %}Refund and cancellation policy{% endblock %}
+{% block legal %}
+<h1>Refunds and cancellation</h1>
+<h2>No automatic renewals</h2>
+<p>Every {{ app_name }} payment covers a fixed period. Nothing is charged again unless you choose to pay, so there's nothing to cancel.</p>
+<h2>7-day refund</h2>
+<p>If you're not happy, email <a href="mailto:{{ support_email }}">{{ support_email }}</a> within 7 days of paying for a full refund. Include the email on your account. Refunds go back to the original payment method within 5 to 7 working days of approval.</p>
+<h2>After 7 days</h2>
+<p>Payments aren't refundable after 7 days, except where the law requires or where a fault on our side stopped you using the service.</p>
+<h2>Failed or double payments</h2>
+<p>If money left your account but your plan didn't upgrade, it's usually confirmed automatically within an hour. If not, write to us with the payment reference and we'll fix it or refund it.</p>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% set public_layout = true %}
+{% block title %}Create your account{% endblock %}
+{% block public %}
+<section class="panel auth-card">
+  <h1>Create your account</h1>
+  <p class="muted" style="margin:.35rem 0 1.25rem">Free forever for tracking and 3-day plans. No card needed.</p>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field"><label for="username">Name to show</label><input id="username" name="username" autocomplete="username" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_.]{3,30}" value="{{ form.get('username', '') }}"><span class="hint">3 to 30 letters, numbers, dots or underscores.</span></div>
+    <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required value="{{ form.get('email', '') }}"></div>
+    <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="new-password" required minlength="8"><span class="hint">At least 8 characters.</span></div>
+    <div class="field"><label class="check"><input type="checkbox" name="accept_terms" required {% if form.get('accept_terms') %}checked{% endif %}><span>I'm 18 or older and agree to the <a href="{{ url_for('main.terms') }}" target="_blank" rel="noopener">Terms</a> and <a href="{{ url_for('main.privacy') }}" target="_blank" rel="noopener">Privacy Policy</a>, including use of my health details to plan my meals.</span></label></div>
+    <div class="field"><label class="check"><input type="checkbox" name="marketing" {% if form.get('marketing') %}checked{% endif %}><span>Send me occasional recipes and festival meal plans. Optional.</span></label></div>
+    <button class="btn btn-primary btn-block" type="submit">Create account</button>
+  </form>
+  <p style="margin-top:1rem">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+</section>
+{% endblock %}

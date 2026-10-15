@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% set public_layout = true %}
+{% block title %}Reset your password{% endblock %}
+{% block public %}
+<section class="panel auth-card">
+  <h1>Reset your password</h1>
+  <p class="muted" style="margin:.35rem 0 1.25rem">Enter your account email and we'll send a link that works for 1 hour.</p>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required></div>
+    <button class="btn btn-primary btn-block" type="submit">Send reset link</button>
+  </form>
+  <p style="margin-top:1rem"><a href="{{ url_for('auth.login') }}">Back to log in</a></p>
+</section>
+{% endblock %}

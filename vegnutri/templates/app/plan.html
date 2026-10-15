@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}Meal plan{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Your meal plan</h1>
+    <p>Matched to {{ p.daily_calories|num }} kcal and {{ p.daily_protein }} g protein a day, {{ DIET_MODES[p.diet_mode][0]|lower }}{% if p.daily_budget and has_feature('budget') %}, within about ₹{{ p.daily_budget }} a day{% endif %}.</p>
+  </div>
+  <div class="row">
+    <a class="btn" href="{{ url_for('planner.grocery') }}">{{ icon('grocery') }}Grocery list</a>
+    <form method="post" action="{{ url_for('planner.regenerate') }}" data-confirm="Replace today's and upcoming meals with a fresh plan?">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn" type="submit">{{ icon('swap') }}New plan</button>
+    </form>
+  </div>
+</div>
+
+<div class="day-tabs" role="tablist" aria-label="Days">
+  {% for d, v in week %}
+  <button type="button" class="day-tab" role="tab" id="tab-{{ loop.index0 }}" aria-controls="day-{{ loop.index0 }}"
+          aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ 0 if loop.first else -1 }}">
+    {{ 'Today' if d == today else d.strftime('%a') }}<small>{{ d.strftime('%d %b') }}</small>
+  </button>
+  {% endfor %}
+  {% for i in range(locked_days) %}
+  <a class="day-tab locked" href="{{ url_for('billing.pricing') }}" title="Pro plans the whole week">{{ icon('lock') }}<small>Pro</small></a>
+  {% endfor %}
+</div>
+
+{% for d, v in week %}
+<section class="day-panel panel" id="day-{{ loop.index0 }}" role="tabpanel" aria-labelledby="tab-{{ loop.index0 }}" {% if not loop.first %}hidden{% endif %}>
+  <div class="panel-head">
+    <h2>{{ d.strftime('%A %d %B') }}</h2>
+    <span class="row">
+      {% if v.fasting %}<span class="tag turmeric">Vrat day</span>{% endif %}
+      {% if v.scale != 1 %}<span class="tag" title="Each portion is scaled to fit your calories">{{ v.scale }}× portions</span>{% endif %}
+    </span>
+  </div>
+  <div class="divided">
+    {% for slot, m in v.meals.items() %}
+    <div class="meal" data-meal>
+      <span class="slot">{{ slot_labels[slot] }}</span>
+      <span class="name"><a href="{{ url_for('planner.recipe', meal_key=m.key) }}">{{ m.name }}</a></span>
+      <span class="macros">{{ m.kcal|num }} kcal, {{ m.protein|num }} g protein, {{ m.mins }} min</span>
+      <span class="actions">
+        <button type="button" class="btn btn-sm btn-quiet" data-swap-url="{{ url_for('planner.swap', day=d.isoformat(), slot=slot) }}" aria-label="Swap {{ slot_labels[slot]|lower }}">{{ icon('swap') }}Swap</button>
+        {% if d <= today %}
+        <form method="post" action="{{ url_for('planner.log_planned', day=d.isoformat(), slot=slot) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm" type="submit">{{ icon('check') }}Ate this</button>
+        </form>
+        {% endif %}
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+  <p style="margin-top:1rem" class="muted">Day total: <strong class="num" data-total="kcal">{{ v.totals.kcal|num }}</strong> kcal,
+    <strong class="num" data-total="protein">{{ v.totals.protein|num }}</strong> g protein,
+    about ₹<strong class="num" data-total="cost">{{ v.totals.cost|num }}</strong> in ingredients.</p>
+  {% if v.totals.protein < p.daily_protein * 0.85 %}
+  <p class="notice" style="margin-top:.75rem"><strong>This day is a little short on protein.</strong>Add a katori of curd, 50 g roasted chana or a glass of milk{% if p.diet_mode == 'vegan' %} (soy milk for you){% endif %}, or swap a meal.</p>
+  {% endif %}
+</section>
+{% endfor %}
+{% if locked_days %}
+<p class="notice" style="margin-top:1rem"><strong>Want the whole week?</strong>Pro plans 7 days at a time, fits your budget and handles vrat days. <a href="{{ url_for('billing.pricing') }}">See Pro</a></p>
+{% endif %}
+{% endblock %}

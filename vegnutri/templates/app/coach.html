@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Coach{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Your nutrition coach</h1>
+    <p>Knows your targets, today's food and your diet rules. <span class="num" id="quota-left">{{ quota.left }}</span> of {{ quota.limit }} questions left today.</p>
+  </div>
+  {% if history %}
+  <form method="post" action="{{ url_for('coach.clear') }}" data-confirm="Clear this conversation?">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-sm" type="submit">Clear chat</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if not configured %}
+<p class="notice"><strong>The coach isn't switched on for this server.</strong>Set GROQ_API_KEY in the environment to enable it.</p>
+{% else %}
+<section class="panel chat">
+  <div class="chat-log" id="chat-log" aria-live="polite">
+    {% for m in history %}<div class="bubble {{ m.role }}">{{ m.content }}</div>{% endfor %}
+    {% if not history %}
+    <div id="chat-empty">
+      <p class="muted" style="margin-bottom:.75rem">Ask anything about your food. A few ideas:</p>
+      <div class="starters">{% for s in starters %}<button type="button" class="btn btn-sm" data-starter="{{ s }}">{{ s }}</button>{% endfor %}</div>
+    </div>
+    {% endif %}
+  </div>
+  <form class="chat-form" id="chat-form">
+    <label for="chat-input" class="sr-only">Your question</label>
+    <textarea id="chat-input" maxlength="1500" placeholder="Ask in English, Hindi, Tamil or any language" rows="1">{{ prefill }}</textarea>
+    <button class="btn btn-primary" type="submit">Send</button>
+  </form>
+</section>
+<p class="hint" style="margin-top:.75rem">The coach gives general guidance and can make mistakes. It isn't a doctor. For medical conditions, pregnancy or medicines, ask a professional.{% if not current_user.is_paid %} Pro gives you 60 questions a day. <a href="{{ url_for('billing.pricing') }}">See Pro</a>{% endif %}</p>
+{% endif %}
+{% endblock %}

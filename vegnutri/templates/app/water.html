@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "_macros.html" import pct %}
+{% block title %}Water{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Water</h1><p>Your goal is {{ (goal/1000)|round(1) }} litres a day, based on your weight and activity.</p></div></div>
+<div class="grid grid-2">
+  <section class="panel">
+    <p class="num" style="font-size:2.4rem;font-weight:800"><span data-water-total>{{ total|num }}</span> <small class="muted">of {{ goal|num }} ml</small></p>
+    <div class="bar water" style="margin:.75rem 0 1.25rem"><span data-water-bar style="width:{{ pct(total, goal) }}%"></span></div>
+    <div class="row">
+      {% for ml, lbl in [(150,'Small cup'),(250,'Glass'),(500,'Bottle'),(1000,'Large bottle')] %}
+      <button type="button" class="btn" data-water="{{ ml }}">{{ lbl }}<small class="muted">{{ ml }} ml</small></button>
+      {% endfor %}
+    </div>
+    <p class="hint" style="margin-top:1rem">Buttons save straight away. Refresh to see them in the list.</p>
+  </section>
+  <section class="panel">
+    <h2>This week</h2>
+    <div style="height:220px"><canvas data-chart='{{ {"type":"bar","labels":labels,"series":[{"label":"Water (ml)","data":values,"color":"water"}]}|tojson|forceescape }}' aria-label="Water each day this week"></canvas></div>
+  </section>
+</div>
+<section class="panel" style="margin-top:1rem">
+  <h2>Today</h2>
+  {% if logs %}
+  <div class="divided">
+    {% for w in logs %}
+    <div class="list-row"><span class="num">{{ w.amount_ml }} ml</span><span class="row"><small class="muted">{{ w.created_at.strftime('%H:%M') }} UTC</small>
+      <form method="post" action="{{ url_for('tracker.delete_water', log_id=w.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-quiet btn-danger" type="submit">Remove</button></form></span></div>
+    {% endfor %}
+  </div>
+  {% else %}<p class="muted">No water logged yet today.</p>{% endif %}
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='vendor/chart-4.4.0.umd.js') }}"></script>{% endblock %}
