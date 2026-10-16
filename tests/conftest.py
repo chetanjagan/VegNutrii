@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from vegnutri import create_app
@@ -5,9 +7,15 @@ from vegnutri.config import TestConfig
 from vegnutri.extensions import db as _db
 
 
+class _Config(TestConfig):
+    # Set TEST_DATABASE_URL=postgresql://... to run the suite against Postgres
+    SQLALCHEMY_DATABASE_URI = os.environ.get("TEST_DATABASE_URL", TestConfig.SQLALCHEMY_DATABASE_URI).replace(
+        "postgresql://", "postgresql+psycopg://")
+
+
 @pytest.fixture
 def app():
-    app = create_app(TestConfig)
+    app = create_app(_Config)
     with app.app_context():
         _db.create_all()
         yield app

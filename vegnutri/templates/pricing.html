@@ -9,10 +9,23 @@
 </div>
 {% if demo %}<p class="notice"><strong>Demo billing is on.</strong>Upgrades are free and instant on this local copy. Never enable this in production.</p>{% elif not configured %}<p class="notice"><strong>Payments aren't set up on this server yet.</strong>Add Razorpay keys to the environment to take payments.</p>{% endif %}
 
+{% if current_user.is_authenticated and current_user.trial_days_left is not none %}
+<p class="notice" style="margin-bottom:1rem"><strong>You're on a Pro trial with {{ current_user.trial_days_left }} day{{ 's' if current_user.trial_days_left != 1 }} left.</strong>Buy now and your paid time starts after the trial ends, so you don't lose any days.</p>
+{% endif %}
+<div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:.5rem">
 <div class="period-toggle" role="group" aria-label="Billing period">
   <button type="button" data-period="month" aria-pressed="false">Monthly</button>
   <button type="button" data-period="year" aria-pressed="true">Yearly (save 41%)</button>
 </div>
+{% if current_user.is_authenticated %}
+<form class="row" id="coupon-form" style="flex-wrap:nowrap">
+  <label for="coupon" class="sr-only">Coupon code</label>
+  <input id="coupon" type="text" placeholder="Coupon code" maxlength="30" autocomplete="off" style="max-width:180px;text-transform:uppercase">
+  <button type="submit" class="btn">Apply</button>
+</form>
+{% endif %}
+</div>
+<p id="coupon-status" class="muted" role="status" style="min-height:1.5em;margin-bottom:1rem"></p>
 
 <div class="grid grid-3">
   <section class="panel price-card">
@@ -26,13 +39,13 @@
       <li>Iron tracking</li>
       <li>2-day grocery list</li>
     </ul>
-    {% if current_user.is_authenticated %}<span class="btn" aria-disabled="true">{% if current_user.active_plan == 'free' %}Your current plan{% else %}Included{% endif %}</span>
+    {% if current_user.is_authenticated %}<span class="btn" aria-disabled="true">{% if current_user.active_plan == 'free' %}Your current plan{% elif current_user.trial_days_left is not none %}Where you'll go after the trial{% else %}Included{% endif %}</span>
     {% else %}<a class="btn" href="{{ url_for('auth.register') }}">Start free</a>{% endif %}
   </section>
 
   <section class="panel price-card featured">
     <h2>Pro</h2>
-    <p class="price" data-price-month="{{ plans.pro.prices.month|inr }}" data-price-year="{{ plans.pro.prices.year|inr }}">{{ plans.pro.prices.year|inr }}<small> / year</small></p>
+    <p class="price" data-plan="pro" data-price-month="{{ plans.pro.prices.month|inr }}" data-price-year="{{ plans.pro.prices.year|inr }}">{{ plans.pro.prices.year|inr }}<small> / year</small></p>
     <p class="muted">For people serious about their protein.</p>
     <ul>
       <li>Full 7-day plans</li>
@@ -44,15 +57,15 @@
     </ul>
     {% if current_user.is_authenticated %}
       <button type="button" class="btn btn-primary" data-checkout="pro" data-period="year" {% if not configured and not demo %}disabled{% endif %}>
-        {% if current_user.active_plan == 'pro' %}Add more time{% else %}Get Pro{% endif %}</button>
+        {% if current_user.trial_days_left is not none %}Keep Pro{% elif current_user.active_plan == 'pro' %}Add more time{% else %}Get Pro{% endif %}</button>
     {% else %}
-      <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Start free, upgrade anytime</a>
+      <a class="btn btn-primary" href="{{ url_for('auth.register') }}">{% if config.TRIAL_DAYS %}Try Pro free for {{ config.TRIAL_DAYS }} days{% else %}Start free, upgrade anytime{% endif %}</a>
     {% endif %}
   </section>
 
   <section class="panel price-card">
     <h2>Family</h2>
-    <p class="price" data-price-year="{{ plans.family.prices.year|inr }}">{{ plans.family.prices.year|inr }}<small> / year</small></p>
+    <p class="price" data-plan="family" data-price-year="{{ plans.family.prices.year|inr }}">{{ plans.family.prices.year|inr }}<small> / year</small></p>
     <p class="muted">One kitchen, everyone's portions.</p>
     <ul>
       <li>Everything in Pro</li>

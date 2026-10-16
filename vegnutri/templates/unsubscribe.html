@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% set public_layout = true %}
+{% block title %}Stop weekly emails{% endblock %}
+{% block public %}
+<section class="panel auth-card">
+  <h1>Stop weekly emails?</h1>
+  <p class="muted" style="margin:.5rem 0 1.25rem">You'll stop getting your weekly progress summary. Account emails like password resets still arrive.</p>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-primary" type="submit">Stop weekly emails</button>
+  </form>
+</section>
+{% endblock %}

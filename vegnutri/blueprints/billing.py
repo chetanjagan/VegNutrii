@@ -24,7 +24,7 @@ def create_order():
     data = request.get_json(silent=True) or {}
     plan, period = data.get("plan"), data.get("period")
     try:
-        payment = svc.create_order(current_user, plan, period)
+        payment = svc.create_order(current_user, plan, period, data.get("coupon"))
     except svc.BillingError as exc:
         return jsonify({"error": "billing", "message": str(exc)}), 400
     return jsonify({
@@ -34,6 +34,25 @@ def create_order():
         "description": f"{PLANS[plan]['name']} plan, {'1 month' if period == 'month' else '1 year'}",
         "prefill": {"email": current_user.email, "name": current_user.username},
     })
+
+
+@bp.route("/api/billing/quote", methods=["POST"])
+@limiter.limit("30 per hour")
+def quote():
+    """Check a coupon code and return discounted prices for every paid plan and period."""
+    code = ((request.get_json(silent=True) or {}).get("coupon") or "").strip()
+    prices, error, applied = {}, None, None
+    for plan, cfg in PLANS.items():
+        for period in cfg["prices"]:
+            q = svc.quote(plan, period, code)
+            prices[f"{plan}-{period}"] = {"price": q["price"], "amount": q["amount"], "discount": q["discount"]}
+            if q["coupon"]:
+                applied = {"code": q["coupon"], "percent_off": q["percent_off"]}
+            elif q["error"] and not applied:
+                error = q["error"]
+    if applied:
+        error = None
+    return jsonify({"prices": prices, "applied": applied, "error": error})
 
 
 @bp.route("/api/billing/verify", methods=["POST"])

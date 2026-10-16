@@ -19,6 +19,12 @@ VegNutri plans a week of real Indian meals around each user's calorie and protei
 - Tracking for food, water, weight, mood, a calendar and milestones, plus custom dishes.
 - An installable phone app (PWA), light and dark themes, and full mobile support.
 
+**Growth features**
+- A free 7-day Pro trial for every new sign-up (14 days for invited friends). No card needed; it simply ends. Buying during a trial adds the paid time after the trial, so no days are lost.
+- Coupon codes for festival offers and partners, created and switched on or off from `/admin`. Prices are rounded to whole rupees, so the price shown is exactly the price charged.
+- Referrals: each user gets an invite link and a WhatsApp share button. When an invited friend makes their first payment, the inviter gets 30 days of Pro.
+- A weekly progress email every Monday at 9 AM India time: protein days, averages, weight trend, low nutrients and a food tip, with one-click unsubscribe. It's scheduled free through GitHub Actions.
+
 **For you, the operator**
 - Free, Pro and Family plans with feature gating, paid through Razorpay with server-side signature checks and a webhook.
 - An admin dashboard at `/admin` showing users, weekly actives, paying users, conversion and 30-day revenue.
@@ -55,6 +61,21 @@ To try the paywall without real payments, set `FLASK_DEBUG=1` and `DEMO_BILLING=
 
 To make yourself an admin, either put your email in `ADMIN_EMAILS` or run `flask --app wsgi make-admin you@example.com`.
 
+## Admin access
+
+Admins get **every Pro and Family feature free**, so you can use and check everything without paying. Admin access doesn't change your stored plan, isn't counted as a paying user in the stats, and never touches billing.
+
+To become an admin on Render (the free plan has no shell, so use the environment variable):
+1. In Render, open Environment and set `ADMIN_EMAILS` to your email. Separate several with commas.
+2. Save, wait for the redeploy, then log out of VegNutri and log back in.
+3. "Admin" appears in the sidebar. Open it, or go to `/admin`.
+
+On the admin page:
+- **Plans and what they include** lists every feature on Free, Pro and Family, built from the live settings in `vegnutri/services/plans.py`.
+- **See the app as a user would** lets you preview as Free, Pro or Family, paywalls included. A bar at the top shows you're previewing; click Stop preview to get full access back. Only your own view changes.
+
+Removing an email from `ADMIN_EMAILS` doesn't revoke an existing admin. To remove one, edit `is_admin` in the database.
+
 ## Configuration
 
 Every setting is an environment variable. See `.env.example` for the full list with comments. The ones that matter:
@@ -65,7 +86,10 @@ Every setting is an environment variable. See `.env.example` for the full list w
 | `DATABASE_URL` | Postgres in production. Defaults to a local SQLite file. |
 | `GROQ_API_KEY` | The AI coach. Create one at console.groq.com/keys. Run `flask --app wsgi coach-check` to test it. |
 | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` | Payments. |
-| `MAIL_SERVER` and related | Password-reset emails. Without it, emails are printed to the log. |
+| `BREVO_API_KEY`, `MAIL_FROM` | Email (password resets, weekly summary) via Brevo's HTTPS API. Free tier: 300 emails a day. `MAIL_FROM` must be a sender you've verified in Brevo. |
+| `MAIL_SERVER` and related | SMTP email instead of Brevo. Some hosts' free tiers block SMTP ports, so Brevo is the safer choice. |
+| `TASK_TOKEN` | Secret shared with the weekly-email GitHub Action. Render generates one for you. |
+| `TRIAL_DAYS`, `REFERRAL_TRIAL_DAYS`, `REFERRAL_REWARD_DAYS` | Trial and referral lengths (defaults 7, 14 and 30 days). `TRIAL_DAYS=0` turns trials off. |
 | `SESSION_COOKIE_SECURE=1` | Set this in production (HTTPS). |
 | `APP_URL`, `SUPPORT_EMAIL`, `COMPANY_NAME` | Shown in emails and legal pages. |
 
@@ -94,6 +118,26 @@ The container runs `flask db upgrade` and then gunicorn on port 8000. Put it beh
 
 With more than one server instance, set `RATELIMIT_STORAGE_URI` to a Redis URL so rate limits are shared.
 
+## Set up the growth features
+
+**APP_URL.** Set it to your live address, for example `https://vegnutri.onrender.com`. Invite links and every link in the weekly email are built from it, so without it they point at `localhost`.
+
+**Email (Brevo).**
+1. Create a free account at brevo.com.
+2. Under Senders, add and verify the address you'll send from.
+3. Under SMTP and API, then API Keys, create a key.
+4. In Render, set `BREVO_API_KEY` to the key and `MAIL_FROM` to `VegNutri <the-address-you-verified>`.
+5. Test it with "Forgot password?" on your own account.
+
+**Weekly email schedule (GitHub Actions).**
+1. In Render, open Environment and copy the value of `TASK_TOKEN`.
+2. In GitHub, open the repo's Settings, then Secrets and variables, then Actions. Add two repository secrets: `APP_URL` (your live address) and `TASK_TOKEN` (the value you copied).
+3. In the Actions tab, open "Weekly progress email" and click Run workflow to test it now. After that it runs every Monday on its own.
+
+Users can turn the email off from Account or from the link at the bottom of each email. People with no logs in 30 days aren't emailed.
+
+**Coupons.** In `/admin`, scroll to Coupons, enter a code (such as `DIWALI25`), the discount, an optional usage limit and last day, then click Create coupon. Customers type it on the pricing page.
+
 ## Moving from the old version (v3)
 
 The old app was a single `app.py` with a SQLite `nutrition.db`. To bring existing users across:
@@ -114,7 +158,7 @@ When updating the GitHub repo, delete the old `app.py`, `templates/` and `static
 pytest -q
 ```
 
-76 tests cover diet-rule compliance for every diet mode, cuisine and allergy; fasting days; calorie accuracy; target safety floors; children's targets; login, reset tokens and open-redirect protection; CSRF and security headers; users being unable to read or delete each other's data; server-side nutrition values; Razorpay signature, webhook, amount and renewal handling; plan gating; coach quotas; and data export and deletion. CI runs them on every push and checks that migrations match the models.
+118 tests cover admin access and preview, trials, coupons, referrals and the weekly email, plus diet-rule compliance for every diet mode, cuisine and allergy; fasting days; calorie accuracy; target safety floors; children's targets; login, reset tokens and open-redirect protection; CSRF and security headers; users being unable to read or delete each other's data; server-side nutrition values; Razorpay signature, webhook, amount and renewal handling; plan gating; coach quotas; and data export and deletion. CI runs them on every push against both SQLite and Postgres, and checks that migrations apply cleanly and match the models. To run them against Postgres locally, set `TEST_DATABASE_URL=postgresql://...`.
 
 ## Project layout
 
@@ -153,7 +197,7 @@ These need a human; code can't do them.
 These are the highest-value next steps, roughly in order:
 
 1. **Grow the meal catalogue with a dietitian**, especially sattvic Maharashtrian, Bengali and Rajasthani, plus more vegan options. This is the product's moat.
-2. **Weekly WhatsApp or email summaries** ("You hit protein 5 of 7 days; iron was low"). This is the biggest retention lever.
+2. **WhatsApp delivery for the weekly summary.** The email version is built; WhatsApp gets far higher open rates in India.
 3. **Photo and voice logging** in Indian languages, using a vision model and Groq's Whisper speech-to-text.
 4. **Dietitian marketplace.** Verified dietitians run paid programmes in the app and you take a commission.
 5. **Condition programmes** for PCOS, prediabetes and thyroid, built with clinicians.

@@ -160,7 +160,7 @@ small, .muted { color: var(--ink-2); }
 
 label { display: block; font-weight: 700; font-size: .92rem; margin-bottom: .3rem; }
 .hint { display: block; font-weight: 400; color: var(--ink-2); font-size: .85rem; margin-top: .25rem; }
-input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], input[type="search"], select, textarea {
+input:not([type]), input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], input[type="search"], select, textarea {
   width: 100%; padding: .65rem .8rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface);
   color: var(--ink); font: 1rem var(--font-body); min-height: 44px;
 }
@@ -354,3 +354,6 @@ details p { margin-top: .5rem; color: var(--ink-2); }
   .site-head nav .hide-sm { display: none; }
   .site-head .btn { padding-inline: .75rem; }
 }
+.price-card .price .was { font-size: 1rem; font-weight: 500; color: var(--ink-3); margin-left: .5rem; }
+.tag { display: inline-flex; align-items: center; gap: .25rem; }
+.tag svg { width: 13px; height: 13px; flex: none; }

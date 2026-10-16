@@ -4,7 +4,8 @@
 {% block public %}
 <section class="panel auth-card">
   <h1>Create your account</h1>
-  <p class="muted" style="margin:.35rem 0 1.25rem">Free forever for tracking and 3-day plans. No card needed.</p>
+  {% if inviter %}<p class="notice" style="margin:.75rem 0 0"><strong>{{ inviter }} invited you.</strong>You get a {{ trial_days }}-day Pro trial instead of the usual one.</p>{% endif %}
+  <p class="muted" style="margin:.75rem 0 1.25rem">{% if inviter %}No card needed, and nothing is charged when it ends.{% elif trial_days %}Includes a free {{ trial_days }}-day Pro trial. No card needed, and nothing is charged when it ends.{% else %}Free forever for tracking and 3-day plans. No card needed.{% endif %}</p>
   <form method="post">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="field"><label for="username">Name to show</label><input id="username" name="username" autocomplete="username" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_.]{3,30}" value="{{ form.get('username', '') }}"><span class="hint">3 to 30 letters, numbers, dots or underscores.</span></div>

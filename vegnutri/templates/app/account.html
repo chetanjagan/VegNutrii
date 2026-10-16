@@ -5,7 +5,13 @@
 <div class="grid grid-2">
   <section class="panel">
     <h2>Your plan</h2>
-    {% if current_user.is_paid %}
+    {% if current_user.is_admin %}
+      <p><strong>Admin access.</strong> {% if current_user.admin_preview %}You're previewing the app as a {{ current_plan.name }} user.{% else %}Every Pro and Family feature is open to you, free.{% endif %}</p>
+      <a class="btn" style="margin-top:.75rem" href="{{ url_for('admin.index') }}#plans">Plans and preview</a>
+    {% elif current_user.trial_days_left is not none %}
+      <p><strong>Pro trial</strong>, {{ current_user.trial_days_left }} day{{ 's' if current_user.trial_days_left != 1 }} left (ends {{ current_user.plan_expires_at.strftime('%d %B') }}). Nothing is charged when it ends; you simply move to Free.</p>
+      <a class="btn btn-primary" style="margin-top:.75rem" href="{{ url_for('billing.pricing') }}">Keep Pro</a>
+    {% elif current_user.is_paid %}
       <p><strong>{{ current_plan.name }}</strong> until {{ current_user.plan_expires_at.strftime('%d %B %Y') }}. It won't renew automatically.</p>
       <a class="btn" style="margin-top:.75rem" href="{{ url_for('billing.pricing') }}">Add more time</a>
     {% else %}
@@ -22,6 +28,18 @@
   </section>
 
   <section class="panel">
+    <h2>Invite friends, get Pro free</h2>
+    <p class="muted">When someone you invite buys any plan, you get {{ reward_days }} days of Pro.{% if friend_days %} They get a {{ friend_days }}-day trial.{% endif %}</p>
+    <div class="row" style="margin:.9rem 0 .5rem;flex-wrap:nowrap">
+      <label for="invite-url" class="sr-only">Your invite link</label>
+      <input id="invite-url" type="text" readonly value="{{ invite_url }}">
+      <button type="button" class="btn" data-copy="#invite-url">Copy</button>
+    </div>
+    <a class="btn btn-sm" href="https://wa.me/?text={{ ('Try VegNutri for vegetarian meal plans. Sign up with my link: ' ~ invite_url)|urlencode }}" target="_blank" rel="noopener">Share on WhatsApp</a>
+    <p class="muted" style="margin-top:.75rem">{{ invited }} friend{{ 's' if invited != 1 }} joined. {{ current_user.referral_rewards }} reward{{ 's' if current_user.referral_rewards != 1 }} earned.</p>
+  </section>
+
+  <section class="panel">
     <h2>Change password</h2>
     <form method="post" action="{{ url_for('account.change_password') }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -35,6 +53,7 @@
     <h2>Emails</h2>
     <form method="post" action="{{ url_for('account.preferences') }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field"><label class="check"><input type="checkbox" name="weekly_digest" {% if current_user.weekly_digest %}checked{% endif %}><span>Weekly progress summary, every Monday</span></label></div>
       <div class="field"><label class="check"><input type="checkbox" name="marketing" {% if current_user.marketing_opt_in %}checked{% endif %}><span>Recipes and festival meal plans, now and then</span></label></div>
       <button class="btn" type="submit">Save email preferences</button>
     </form>

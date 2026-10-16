@@ -1,6 +1,7 @@
 from datetime import date, datetime, timezone
 
 from flask_login import UserMixin
+from sqlalchemy import false, true
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .extensions import db
@@ -24,6 +25,16 @@ class User(UserMixin, db.Model):
 
     plan = db.Column(db.String(20), default="free", nullable=False)  # free | pro | family
     plan_expires_at = db.Column(db.DateTime)
+    on_trial = db.Column(db.Boolean, default=False, server_default=false(), nullable=False)
+
+    # Referrals: code is created on first use; referred_by_id is who invited this user
+    referral_code = db.Column(db.String(12), unique=True, index=True)
+    referred_by_id = db.Column(db.Integer)
+    referral_rewards = db.Column(db.Integer, default=0, server_default="0", nullable=False)
+
+    # Weekly progress email
+    weekly_digest = db.Column(db.Boolean, default=True, server_default=true(), nullable=False)
+    last_digest_at = db.Column(db.DateTime)
 
     profile = db.relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
 
@@ -45,8 +56,26 @@ class User(UserMixin, db.Model):
         return bool(self.password_hash) and ":" not in self.password_hash
 
     @property
+    def admin_preview(self):
+        """For admins: the plan they're previewing the app as (set from /admin), else None."""
+        if not self.is_admin:
+            return None
+        from flask import has_request_context, session
+        if has_request_context():
+            plan = session.get("admin_preview")
+            if plan in ("free", "pro", "family"):
+                return plan
+        return None
+
+    @property
     def active_plan(self):
-        """The plan the user can use right now (expired paid plans fall back to free)."""
+        """The plan the user can use right now (expired paid plans fall back to free).
+
+        Admins get Family (everything) so they can use and check every feature,
+        unless they've chosen to preview the app as another plan.
+        """
+        if self.is_admin:
+            return self.admin_preview or "family"
         if self.plan in ("pro", "family") and self.plan_expires_at and self.plan_expires_at > utcnow():
             return self.plan
         return "free"
@@ -54,6 +83,24 @@ class User(UserMixin, db.Model):
     @property
     def is_paid(self):
         return self.active_plan != "free"
+
+    @property
+    def trial_days_left(self):
+        """Whole days left on a running trial, else None."""
+        if self.is_admin or not self.on_trial or self.active_plan == "free":
+            return None
+        return max((self.plan_expires_at - utcnow()).days + 1, 0)
+
+    def ensure_referral_code(self):
+        if not self.referral_code:
+            import secrets
+            alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O/1/I confusion
+            while True:
+                code = "".join(secrets.choice(alphabet) for _ in range(8))
+                if not User.query.filter_by(referral_code=code).first():
+                    self.referral_code = code
+                    break
+        return self.referral_code
 
 
 class Profile(db.Model):
@@ -202,6 +249,23 @@ class Payment(db.Model):
     currency = db.Column(db.String(3), default="INR", nullable=False)
     order_id = db.Column(db.String(64), unique=True, nullable=False)
     payment_id = db.Column(db.String(64), unique=True)
+    coupon_code = db.Column(db.String(30))
+    discount_paise = db.Column(db.Integer, default=0, server_default="0", nullable=False)
     status = db.Column(db.String(20), default="created", nullable=False)  # created | paid | failed
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
     paid_at = db.Column(db.DateTime)
+
+
+class Coupon(db.Model):
+    """Discount codes for festival offers and partnerships. Managed from /admin."""
+    __tablename__ = "coupons"
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(30), unique=True, nullable=False, index=True)  # stored upper-case
+    percent_off = db.Column(db.Integer, nullable=False)  # 1-90
+    plans = db.Column(db.String(40), default="pro,family", nullable=False)  # which plans it applies to
+    max_uses = db.Column(db.Integer)  # None = unlimited
+    uses = db.Column(db.Integer, default=0, server_default="0", nullable=False)
+    expires_at = db.Column(db.DateTime)
+    active = db.Column(db.Boolean, default=True, server_default=true(), nullable=False)
+    note = db.Column(db.String(120), default="", nullable=False)
+    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)

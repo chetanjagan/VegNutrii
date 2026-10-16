@@ -1,4 +1,6 @@
-from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
+from datetime import timedelta
+
+from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
@@ -45,16 +47,49 @@ def register():
         if errors:
             for e in errors:
                 flash(e, "error")
-            return render_template("auth/register.html", form=form), 400
+            return render_template("auth/register.html", form=form, **_invite_context()), 400
         user = User(username=username, email=email, accepted_terms_at=utcnow(),
                     marketing_opt_in=bool(form.get("marketing")))
         user.set_password(password)
         _maybe_admin(user)
+        referrer = _referrer_from_session()
+        if referrer:
+            user.referred_by_id = referrer.id
+        trial_days = current_app.config["REFERRAL_TRIAL_DAYS"] if referrer else current_app.config["TRIAL_DAYS"]
+        if current_app.config["TRIAL_DAYS"] > 0 and trial_days > 0:
+            user.plan, user.on_trial = "pro", True
+            user.plan_expires_at = utcnow() + timedelta(days=trial_days)
         db.session.add(user)
         db.session.commit()
+        session.pop("ref", None)
         login_user(user, remember=True)
+        if user.on_trial:
+            flash(f"Your {trial_days}-day Pro trial has started. No card needed; it simply ends if you don't upgrade.", "success")
         return redirect(url_for("tracker.onboarding"))
-    return render_template("auth/register.html", form=form)
+    return render_template("auth/register.html", form=form, **_invite_context())
+
+
+def _referrer_from_session():
+    code = session.get("ref")
+    if not code:
+        return None
+    return User.query.filter_by(referral_code=code).first()
+
+
+def _invite_context():
+    referrer = _referrer_from_session()
+    cfg = current_app.config
+    days = (cfg["REFERRAL_TRIAL_DAYS"] if referrer else cfg["TRIAL_DAYS"]) if cfg["TRIAL_DAYS"] > 0 else 0
+    return {"inviter": referrer.username if referrer else None, "trial_days": days}
+
+
+@bp.route("/r/<code>")
+def referral(code):
+    """Invite link. Remembers who invited this visitor, then shows the sign-up page."""
+    code = code.strip().upper()[:12]
+    if User.query.filter_by(referral_code=code).first():
+        session["ref"] = code
+    return redirect(url_for("auth.register"))
 
 
 @bp.route("/login", methods=["GET", "POST"])

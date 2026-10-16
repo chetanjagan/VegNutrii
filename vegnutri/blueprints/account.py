@@ -1,12 +1,12 @@
 import json
 from datetime import datetime
 
-from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, logout_user
 
 from ..extensions import db
 from ..models import (ChatMessage, CustomFood, HouseholdMember, MealLog, MealPlan, MoodLog, Payment, Profile,
-                      WaterLog, WeightLog)
+                      User, WaterLog, WeightLog)
 
 bp = Blueprint("account", __name__, url_prefix="/account")
 
@@ -17,7 +17,14 @@ USER_TABLES = (MealLog, WeightLog, WaterLog, MoodLog, CustomFood, MealPlan, Chat
 @login_required
 def settings():
     payments = Payment.query.filter_by(user_id=current_user.id).order_by(Payment.created_at.desc()).limit(20).all()
-    return render_template("app/account.html", payments=payments)
+    if not current_user.referral_code:
+        current_user.ensure_referral_code()
+        db.session.commit()
+    invited = User.query.filter_by(referred_by_id=current_user.id).count()
+    return render_template("app/account.html", payments=payments, invited=invited,
+                           invite_url=current_app.config["APP_URL"] + url_for("auth.referral", code=current_user.referral_code),
+                           reward_days=current_app.config["REFERRAL_REWARD_DAYS"],
+                           friend_days=current_app.config["REFERRAL_TRIAL_DAYS"] if current_app.config["TRIAL_DAYS"] else 0)
 
 
 @bp.route("/password", methods=["POST"])
@@ -38,6 +45,7 @@ def change_password():
 @login_required
 def preferences():
     current_user.marketing_opt_in = bool(request.form.get("marketing"))
+    current_user.weekly_digest = bool(request.form.get("weekly_digest"))
     db.session.commit()
     flash("Email preferences saved.", "success")
     return redirect(url_for("account.settings"))

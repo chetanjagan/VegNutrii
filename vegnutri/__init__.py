@@ -41,6 +41,7 @@ def create_app(config_class=Config):
     for bp in (main.bp, auth.bp, tracker.bp, planner.bp, coach.bp, billing.bp, account.bp, admin.bp):
         app.register_blueprint(bp)
     csrf.exempt(billing.webhook)  # authenticated by Razorpay's HMAC signature instead
+    csrf.exempt(main.weekly_digest_task)  # authenticated by TASK_TOKEN instead
 
     _register_template_helpers(app)
     _register_security_headers(app)

@@ -50,7 +50,15 @@ class Config:
     # Lets you click "upgrade" without paying. Only honoured when DEBUG is on.
     DEMO_BILLING = _bool("DEMO_BILLING", False)
 
+    # Growth features
+    TRIAL_DAYS = int(os.environ.get("TRIAL_DAYS", "7"))  # free Pro trial for new sign-ups; 0 turns it off
+    REFERRAL_TRIAL_DAYS = int(os.environ.get("REFERRAL_TRIAL_DAYS", "14"))  # longer trial when invited by a friend
+    REFERRAL_REWARD_DAYS = int(os.environ.get("REFERRAL_REWARD_DAYS", "30"))  # Pro days the inviter earns
+    # Shared secret for scheduled jobs (weekly email). Empty disables the /tasks endpoints.
+    TASK_TOKEN = os.environ.get("TASK_TOKEN", "")
+
     # Email (password reset). If MAIL_SERVER is empty, emails are printed to the log.
+    BREVO_API_KEY = os.environ.get("BREVO_API_KEY", "")  # preferred: HTTPS email API
     MAIL_SERVER = os.environ.get("MAIL_SERVER", "")
     MAIL_PORT = int(os.environ.get("MAIL_PORT", "587"))
     MAIL_USERNAME = os.environ.get("MAIL_USERNAME", "")
@@ -75,3 +83,6 @@ class TestConfig(Config):
     RAZORPAY_KEY_SECRET = "test_secret"
     RAZORPAY_WEBHOOK_SECRET = "whsec_test"
     MAIL_SERVER = ""
+    BREVO_API_KEY = ""
+    TRIAL_DAYS = 0  # existing tests assume a plain free account; trial tests turn it on
+    TASK_TOKEN = "task-secret"

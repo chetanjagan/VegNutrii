@@ -1,0 +1,31 @@
+name: Weekly progress email
+
+# Every Monday 03:30 UTC = 9:00 AM India time. Also runnable by hand from the Actions tab.
+on:
+  schedule:
+    - cron: "30 3 * * 1"
+  workflow_dispatch:
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send emails in batches
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          TASK_TOKEN: ${{ secrets.TASK_TOKEN }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$TASK_TOKEN" ]; then
+            echo "Add APP_URL and TASK_TOKEN under Settings > Secrets and variables > Actions." && exit 1
+          fi
+          # The first call also wakes a sleeping free Render instance, so allow retries.
+          for i in $(seq 1 30); do
+            out=$(curl -fsS --retry 6 --retry-delay 20 --retry-all-errors --max-time 120 \
+                  -X POST -H "X-Task-Token: $TASK_TOKEN" "$APP_URL/tasks/weekly-digest?limit=100")
+            echo "Batch $i: $out"
+            remaining=$(echo "$out" | jq -r '.remaining')
+            failed=$(echo "$out" | jq -r '.failed')
+            if [ "$failed" != "0" ]; then echo "Some emails failed; check the app logs." && exit 1; fi
+            if [ "$remaining" = "0" ]; then echo "All done." && exit 0; fi
+          done
+          echo "Stopped after 30 batches; the rest go next week or on a manual run."

@@ -42,7 +42,11 @@
       </form>
     </nav>
     <div class="plan-chip">
-      {% if current_user.is_paid %}
+      {% if current_user.is_admin %}
+        {% if current_user.admin_preview %}Previewing as {{ current_plan.name }}.{% else %}Admin: full access to every feature.{% endif %} <a href="{{ url_for('admin.index') }}#plans">Plans</a>
+      {% elif current_user.trial_days_left is not none %}
+        Pro trial: {{ current_user.trial_days_left }} day{{ 's' if current_user.trial_days_left != 1 }} left. <a href="{{ url_for('billing.pricing') }}">Keep Pro</a>
+      {% elif current_user.is_paid %}
         {{ current_plan.name }} plan until {{ current_user.plan_expires_at.strftime('%d %b %Y') }}
       {% else %}
         Free plan. <a href="{{ url_for('billing.pricing') }}">See Pro</a>
@@ -56,6 +60,14 @@
   </header>
 
   <main class="main" id="main">
+    {% if current_user.admin_preview %}
+    <form class="notice row between no-print" method="post" action="{{ url_for('admin.preview') }}" style="margin-bottom:1rem">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="next" value="{{ request.full_path if request.method == 'GET' else url_for('tracker.dashboard') }}">
+      <span><strong>Admin preview: you're seeing the app as a {{ current_plan.name }} user.</strong>Paywalls and limits here are exactly what they see.</span>
+      <button class="btn btn-sm" type="submit" name="plan" value="">Stop preview</button>
+    </form>
+    {% endif %}
     {{ flashes() }}
     {% block content %}{% endblock %}
   </main>

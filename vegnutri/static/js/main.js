@@ -32,7 +32,7 @@
 
   // ── Click delegation ─────────────────────────────────────
   document.addEventListener("click", (e) => {
-    const el = e.target.closest("[data-action], [data-swap-url], [data-water], [data-checkout], [data-starter], [role='tab'], [data-period]");
+    const el = e.target.closest("[data-action], [data-swap-url], [data-water], [data-checkout], [data-starter], [role='tab'], [data-period], [data-copy]");
     if (!el) {
       const rail = $(".rail.open");
       if (rail && !e.target.closest(".rail")) rail.classList.remove("open");
@@ -49,7 +49,15 @@
     else if (el.dataset.starter) { e.preventDefault(); const t = $("#chat-input"); if (t) { t.value = el.dataset.starter; $("#chat-form").requestSubmit(); } }
     else if (el.getAttribute("role") === "tab") { selectTab(el); }
     else if (el.dataset.period) { setPeriod(el.dataset.period); }
+    else if (el.dataset.copy) { copyText(el); }
   });
+
+  async function copyText(btn) {
+    const src = $(btn.dataset.copy);
+    if (!src) return;
+    try { await navigator.clipboard.writeText(src.value || src.textContent); toast("Link copied"); }
+    catch (e) { src.select && src.select(); toast("Press Ctrl+C or Cmd+C to copy"); }
+  }
 
   // Confirm before destructive submits
   document.addEventListener("submit", (e) => {
@@ -227,6 +235,34 @@
   }
 
   // ── Pricing / checkout ──────────────────────────────────
+  let appliedCoupon = "";
+  const inr = (paise) => "₹" + Math.round(paise / 100).toLocaleString("en-IN");
+  const couponForm = $("#coupon-form");
+  if (couponForm) {
+    couponForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const code = $("#coupon").value.trim().toUpperCase();
+      const status = $("#coupon-status");
+      const { ok, body } = await postJSON("/api/billing/quote", { coupon: code });
+      if (!ok) { status.textContent = "Couldn't check that code. Try again."; return; }
+      appliedCoupon = body.applied ? body.applied.code : "";
+      status.textContent = body.applied ? `${body.applied.code} applied: ${body.applied.percent_off}% off.`
+        : (code ? body.error || "That code isn't valid." : "");
+      $$(".price[data-plan]").forEach((el) => {
+        ["month", "year"].forEach((period) => {
+          const q = body.prices[`${el.dataset.plan}-${period}`];
+          if (!q) return;
+          const suffix = period === "month" ? "Month" : "Year";
+          el.dataset["price" + suffix] = inr(q.amount);
+          if (q.discount) el.dataset["was" + suffix] = inr(q.price);
+          else delete el.dataset["was" + suffix];
+        });
+      });
+      const current = ($("[data-period][aria-pressed='true']") || {}).dataset;
+      setPeriod((current && current.period) || "year");
+    });
+  }
+
   function setPeriod(period) {
     $$("[data-period]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.period === period ? "true" : "false"));
     $$("[data-price-month], [data-price-year]").forEach((el) => {
@@ -239,6 +275,14 @@
         const s = document.createElement("small");
         s.textContent = period === "month" ? " / month" : " / year";
         el.appendChild(s);
+        const was = el.dataset["was" + (period === "month" ? "Month" : "Year")];
+        if (was) {
+          const w = document.createElement("s");
+          w.className = "was";
+          w.textContent = was;
+          w.setAttribute("aria-label", "was " + was);
+          el.appendChild(w);
+        }
         card.hidden = false;
         if (btn) btn.dataset.period = period;
       } else if (card && btn) {
@@ -252,7 +296,7 @@
     btn.disabled = true;
     const label = btn.textContent;
     btn.textContent = "Opening payment…";
-    const { ok, body } = await postJSON("/api/billing/order", { plan: btn.dataset.checkout, period: btn.dataset.period });
+    const { ok, body } = await postJSON("/api/billing/order", { plan: btn.dataset.checkout, period: btn.dataset.period, coupon: appliedCoupon });
     const reset = () => { btn.disabled = false; btn.textContent = label; };
     if (!ok) { reset(); toast(body.message || "Couldn't start the payment."); return; }
     const verify = async (resp) => {
@@ -307,7 +351,7 @@
           plugins: { legend: { display: datasets.length > 1, labels: { color: ink2, boxWidth: 12 } } },
           scales: {
             x: { grid: { display: false }, ticks: { color: ink2, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
-            y: { beginAtZero: cfg.beginAtZero !== false, grid: { color: line }, ticks: { color: ink2 } },
+            y: { beginAtZero: cfg.beginAtZero !== false, grid: { color: line }, ticks: { color: ink2, precision: cfg.integer ? 0 : undefined } },
           },
         },
       });

@@ -11,6 +11,10 @@
   <a class="btn btn-primary" href="{{ url_for('tracker.log_meal') }}">{{ icon('log') }}Log food</a>
 </div>
 
+{% set tdl = current_user.trial_days_left %}
+{% if tdl is not none and tdl <= 3 %}
+<p class="notice" style="margin-bottom:1rem"><strong>Your Pro trial ends in {{ tdl }} day{{ 's' if tdl != 1 }}.</strong>Keep your full-week plans, vrat days and nutrient tracking. No auto-debit. <a href="{{ url_for('billing.pricing') }}">Keep Pro</a></p>
+{% endif %}
 <section class="panel thali-wrap" aria-labelledby="today-h">
   {{ thali([
       ('k-cal', totals.kcal|num, 'kcal', pct(totals.kcal, p.daily_calories)),

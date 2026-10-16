@@ -16,7 +16,7 @@ import requests
 from flask import current_app
 
 from ..extensions import db
-from ..models import Payment, User, utcnow
+from ..models import Coupon, Payment, User, utcnow
 from .plans import PERIOD_DAYS, PLANS
 
 API = "https://api.razorpay.com/v1"
@@ -36,6 +36,9 @@ def demo_mode():
     return cfg["DEMO_BILLING"] and cfg["DEBUG"] and not is_configured()
 
 
+MIN_AMOUNT_PAISE = 100  # Razorpay's minimum order is Rs 1
+
+
 def price_for(plan, period):
     try:
         return PLANS[plan]["prices"][period]
@@ -43,8 +46,42 @@ def price_for(plan, period):
         raise BillingError("Unknown plan or billing period.")
 
 
-def create_order(user, plan, period):
-    amount = price_for(plan, period)
+def find_coupon(code, plan):
+    """Return (coupon, None) if the code can be used for this plan, else (None, reason)."""
+    code = (code or "").strip().upper()
+    if not code:
+        return None, None
+    c = Coupon.query.filter_by(code=code).first()
+    if not c or not c.active:
+        return None, "That code isn't valid."
+    if c.expires_at and c.expires_at < utcnow():
+        return None, "That code has expired."
+    if c.max_uses is not None and c.uses >= c.max_uses:
+        return None, "That code has been fully used."
+    if plan not in c.plans.split(","):
+        return None, f"That code doesn't apply to the {PLANS[plan]['name']} plan."
+    return c, None
+
+
+def quote(plan, period, code=None):
+    """Price after any coupon: {'price', 'discount', 'amount', 'coupon', 'error'} in paise."""
+    price = price_for(plan, period)
+    coupon, error = find_coupon(code, plan)
+    discount = 0
+    if coupon:
+        # Charge a whole number of rupees so the shown price is exactly what's charged
+        amount = round(price * (100 - coupon.percent_off) / 100 / 100) * 100
+        discount = price - max(amount, MIN_AMOUNT_PAISE)
+    return {"price": price, "discount": discount, "amount": price - discount,
+            "coupon": coupon.code if coupon else None, "percent_off": coupon.percent_off if coupon else 0,
+            "error": error}
+
+
+def create_order(user, plan, period, coupon_code=None):
+    q = quote(plan, period, coupon_code)
+    if q["error"]:
+        raise BillingError(q["error"])
+    amount = q["amount"]
     receipt = f"vn_{user.id}_{secrets.token_hex(6)}"
     if demo_mode():
         order_id = "order_demo_" + secrets.token_hex(8)
@@ -67,7 +104,8 @@ def create_order(user, plan, period):
             current_app.logger.error("Razorpay order failed: %s %s", resp.status_code, resp.text[:300])
             raise BillingError("Couldn't start the payment. Try again in a minute.")
         order_id = resp.json()["id"]
-    payment = Payment(user_id=user.id, plan=plan, period=period, amount_paise=amount, order_id=order_id)
+    payment = Payment(user_id=user.id, plan=plan, period=period, amount_paise=amount, order_id=order_id,
+                      coupon_code=q["coupon"], discount_paise=q["discount"])
     db.session.add(payment)
     db.session.commit()
     return payment
@@ -98,16 +136,43 @@ def activate(payment, payment_id):
     payment.status = "paid"
     payment.payment_id = payment_id
     payment.paid_at = utcnow()
+    if payment.coupon_code:
+        coupon = Coupon.query.filter_by(code=payment.coupon_code).first()
+        if coupon:
+            coupon.uses += 1
     user = db.session.get(User, payment.user_id) if payment.user_id else None
     if user:
+        first_payment = not Payment.query.filter(Payment.user_id == user.id, Payment.status == "paid",
+                                                 Payment.id != payment.id).first()
         now = utcnow()
         start = now
-        if user.plan == payment.plan and user.plan_expires_at and user.plan_expires_at > now:
-            start = user.plan_expires_at  # renewing: stack on top of remaining time
+        still_running = user.plan_expires_at and user.plan_expires_at > now
+        if still_running and (user.plan == payment.plan or user.on_trial):
+            start = user.plan_expires_at  # renewing, or buying during a trial: paid time starts after it
         user.plan = payment.plan
         user.plan_expires_at = start + timedelta(days=PERIOD_DAYS[payment.period])
+        user.on_trial = False
+        if first_payment and user.referred_by_id:
+            _reward_referrer(user.referred_by_id)
     db.session.commit()
     return True
+
+
+def _reward_referrer(referrer_id):
+    """The inviter gets free Pro time when someone they invited pays for the first time."""
+    referrer = db.session.get(User, referrer_id)
+    if not referrer:
+        return
+    days = timedelta(days=current_app.config.get("REFERRAL_REWARD_DAYS", 30))
+    now = utcnow()
+    if referrer.is_paid and not referrer.on_trial:
+        referrer.plan_expires_at += days  # keep their Pro or Family, just longer
+    else:
+        base = referrer.plan_expires_at if referrer.on_trial and referrer.plan_expires_at and referrer.plan_expires_at > now else now
+        referrer.plan = "pro"
+        referrer.plan_expires_at = base + days
+        referrer.on_trial = False
+    referrer.referral_rewards += 1
 
 
 def handle_webhook(event):

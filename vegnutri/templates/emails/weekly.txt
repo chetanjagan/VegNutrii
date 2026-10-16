@@ -1,0 +1,35 @@
+Hi {{ user.username }},
+
+Here's your week from {{ start.strftime('%d %b') }} to {{ end.strftime('%d %b') }}.
+{% if days_logged %}
+- Logged food on {{ days_logged }} of 7 days
+- Reached your protein goal on {{ protein_days }} of 7 days (target {{ p.daily_protein }} g)
+- Averaged {{ avg_kcal }} kcal and {{ avg_pro }} g protein on logged days (target {{ p.daily_calories }} kcal)
+{%- if weight_change is not none %}
+- Weight: {% if weight_change < 0 %}down {{ -weight_change }} kg{% elif weight_change > 0 %}up {{ weight_change }} kg{% else %}steady{% endif %} over two weeks
+{%- endif %}
+{%- if streak > 1 %}
+- You're on a {{ streak }}-day protein streak. Keep it going today.
+{%- endif %}
+{% if low %}
+Worth working on this week:
+{% for n in low %}- {{ n.label }} averaged {{ n.avg }} {{ n.unit }} a day, {{ n.pct }}% of your reference intake. {{ n.advice }}
+{% endfor %}{% endif %}
+{%- if protein_days < 4 %}
+Protein was short on most days. Easy fixes: a katori of curd at lunch, 50 g roasted chana as a snack, or swap one meal in your plan for a paneer, soya or dal dish.
+{% else %}
+Nice work on protein. Your plan for this week is ready: {{ plan_url }}
+{% endif %}
+{%- else %}
+You didn't log anything last week. That's fine. Your meal plan for this week is ready, and logging a planned meal takes one tap:
+{{ plan_url }}
+{% endif %}
+Tip: {{ tip.tip }}
+{% if trial_days_left is not none %}
+Your Pro trial ends in {{ trial_days_left }} day{{ 's' if trial_days_left != 1 }}. Keep full-week plans, vrat days and all nutrients: {{ pricing_url }}
+{% endif %}
+Open {{ app_name }}: {{ dashboard_url }}
+
+{{ app_name }}
+Nutrition guidance, not medical advice.
+Stop these weekly emails: {{ unsubscribe_url }}
