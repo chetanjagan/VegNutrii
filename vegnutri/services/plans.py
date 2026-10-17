@@ -10,6 +10,8 @@ PLANS = {
         "prices": {},
         "plan_days": 3,
         "coach_daily": 5,
+        "photo_daily": 2,   # photo food recognition
+        "smart_daily": 5,   # voice or typed "2 roti aur dal" recognition
         "features": set(),
     },
     "pro": {
@@ -17,6 +19,8 @@ PLANS = {
         "prices": {"month": 9900, "year": 69900},  # paise (Rs 99 / Rs 699)
         "plan_days": 7,
         "coach_daily": 60,
+        "photo_daily": 20,
+        "smart_daily": 40,
         "features": {"budget", "fasting", "micros_full", "grocery_week"},
     },
     "family": {
@@ -24,6 +28,8 @@ PLANS = {
         "prices": {"year": 119900},  # Rs 1,199 per year
         "plan_days": 7,
         "coach_daily": 100,
+        "photo_daily": 30,
+        "smart_daily": 60,
         "max_members": 4,
         "features": {"budget", "fasting", "micros_full", "grocery_week", "family"},
     },

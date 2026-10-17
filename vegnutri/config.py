@@ -42,6 +42,11 @@ class Config:
     # AI coach via Groq (server-side key; users never see or supply it)
     GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
     GROQ_MODEL = os.environ.get("GROQ_MODEL", "")  # optional: force a specific model id
+    GROQ_VISION_MODEL = os.environ.get("GROQ_VISION_MODEL", "")  # optional: force the photo model
+    GROQ_WHISPER_MODEL = os.environ.get("GROQ_WHISPER_MODEL", "")  # optional: force the speech model
+
+    # Uploads (photos are resized in the browser first; this is a safety cap)
+    MAX_CONTENT_LENGTH = 12 * 1024 * 1024
 
     # Payments
     RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "")

@@ -15,7 +15,7 @@
 
 <div class="grid grid-2">
   <section class="panel">
-    <h2>Add food</h2>
+    <div class="panel-head"><h2>Add food</h2><a href="{{ url_for('quicklog.page') }}">Snap a photo or say it instead</a></div>
     <form method="post" id="log-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="source" id="source" value="food">

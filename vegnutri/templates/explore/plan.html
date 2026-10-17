@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "explore/_card.html" import meal_card with context %}
+{% set public_layout = true %}
+{% block title %}{{ title }}: a sample day with {{ plan.totals.protein|num }} g protein{% endblock %}
+{% block description %}{{ intro }} Sample day: {{ plan.totals.kcal|num }} kcal and {{ plan.totals.protein|num }} g protein.{% endblock %}
+{% block head %}<link rel="canonical" href="{{ config.APP_URL }}{{ url_for('explore.meal_plan_page', slug=slug) }}">{% endblock %}
+{% block public %}
+<nav class="muted" style="padding-top:1.5rem;font-size:.9rem" aria-label="Breadcrumb"><a href="{{ url_for('explore.meal_plans_index') }}">Meal plans</a> / {{ diet_label }}</nav>
+<div class="page-head" style="margin-top:.5rem">
+  <div><h1>{{ title }}</h1><p>{{ intro }}</p></div>
+</div>
+<section class="panel">
+  <div class="panel-head"><h2>A sample day</h2><span class="muted">For about {{ kcal|num }} kcal and {{ protein }} g protein</span></div>
+  <div class="divided">
+    {% for slot, m in plan.meals.items() %}
+    <div class="meal no-actions">
+      <span class="slot">{{ {'breakfast':'Breakfast','lunch':'Lunch','snack':'Snack','dinner':'Dinner','extra':'Extra snack'}[slot] }}</span>
+      <span class="name"><a href="{{ url_for('explore.meal', key=m.key) }}">{{ m.name }}</a></span>
+      <span class="macros">{{ m.kcal|num }} kcal, {{ m.protein|num }} g protein</span>
+    </div>
+    {% endfor %}
+  </div>
+  <p style="margin-top:1rem"><strong>Day total: {{ plan.totals.kcal|num }} kcal, {{ plan.totals.protein|num }} g protein, {{ plan.totals.iron|num(1) }} mg iron, {{ plan.totals.calcium|num }} mg calcium.</strong></p>
+  <p class="hint" style="margin-top:.5rem">Portions are scaled to the day's target. Your own plan uses your height, weight, activity and goal.</p>
+</section>
+<section class="panel" style="margin-top:1rem">
+  <h2>Get your own week, planned like this</h2>
+  <p class="muted" style="margin:.35rem 0 1rem">{{ app_name }} builds a full week to your calories and protein, keeps to your diet rules, lets you swap any meal and makes the grocery list.</p>
+  <a class="btn btn-primary" href="{{ url_for('auth.register') }}">{% if config.TRIAL_DAYS %}Try Pro free for {{ config.TRIAL_DAYS }} days{% else %}Start free{% endif %}</a>
+</section>
+{% if more %}
+<section style="margin-top:2rem">
+  <h2 style="margin-bottom:1rem">More meals that fit</h2>
+  <div class="grid grid-3">{% for m in more %}{{ meal_card(m) }}{% endfor %}</div>
+</section>
+{% endif %}
+<section style="margin-top:2rem">
+  <h2 style="margin-bottom:.75rem">Other meal plans</h2>
+  <p class="row">{% for s, page in pages.items() if s != slug %}<a class="btn btn-sm" href="{{ url_for('explore.meal_plan_page', slug=s) }}">{{ page[0] }}</a>{% endfor %}</p>
+</section>
+{% endblock %}

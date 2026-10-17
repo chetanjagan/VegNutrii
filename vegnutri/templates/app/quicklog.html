@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}Snap or say{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Snap, say or type it</h1>
+    <p>Show us your plate, say what you ate, or type it in any language. You check everything before it's logged.</p>
+  </div>
+  <a class="btn" href="{{ url_for('tracker.log_meal') }}">Search instead</a>
+</div>
+
+{% if not configured %}
+<p class="notice"><strong>Smart logging isn't switched on for this server.</strong>Set GROQ_API_KEY in the environment to enable it.</p>
+{% else %}
+<div id="quicklog">
+<div class="grid grid-3">
+  <section class="panel ql-card">
+    <h2>Snap your plate</h2>
+    <p class="muted">Take a photo of your thali or meal from above, with everything in view.</p>
+    <label class="btn btn-primary ql-file">
+      <input type="file" id="ql-photo" accept="image/*" capture="environment">
+      Take or choose a photo
+    </label>
+    <small class="muted"><span data-left="photo">{{ photo.left }}</span> of {{ photo.limit }} photos left today</small>
+  </section>
+
+  <section class="panel ql-card">
+    <h2>Say it</h2>
+    <p class="muted">"Do roti, dal aur ek katori dahi." English, Hindi, Kannada, Tamil and more.</p>
+    <button type="button" class="btn btn-primary" id="ql-record" aria-pressed="false">Start recording</button>
+    <small class="muted"><span id="ql-timer" aria-live="off"></span><span data-left="smart">{{ smart.left }}</span> of {{ smart.limit }} voice or typed left today</small>
+  </section>
+
+  <section class="panel ql-card">
+    <h2>Type it</h2>
+    <form id="ql-text-form">
+      <label for="ql-text" class="sr-only">What did you eat?</label>
+      <textarea id="ql-text" maxlength="500" rows="2" placeholder="2 idli, sambar and a filter coffee"></textarea>
+      <button type="submit" class="btn" style="margin-top:.6rem">Recognise</button>
+    </form>
+  </section>
+</div>
+
+<p id="ql-status" class="muted" role="status" style="min-height:1.6em;margin:1rem 0"></p>
+
+<section class="panel" id="ql-review" hidden>
+  <div class="panel-head"><h2>Check before logging</h2><span class="muted" id="ql-source"></span></div>
+  <p id="ql-note" class="muted" hidden></p>
+  <div id="ql-items" class="divided"></div>
+  <p style="margin-top:1rem"><strong>Selected: <span class="num" id="ql-total-kcal">0</span> kcal, <span class="num" id="ql-total-pro">0</span> g protein</strong></p>
+  <div class="fields" style="margin-top:1rem;align-items:end">
+    <div class="field"><label for="ql-meal">Meal</label>
+      <select id="ql-meal">{% for t in meal_types %}<option value="{{ t }}" {% if t == default_type %}selected{% endif %}>{{ t|title }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="ql-date">Date</label><input type="date" id="ql-date" value="{{ today.isoformat() }}" max="{{ today.isoformat() }}"></div>
+    <div class="field"><button type="button" class="btn btn-primary btn-block" id="ql-save">Log selected</button></div>
+  </div>
+</section>
+</div>
+<p class="hint" style="margin-top:1rem">Photos and recordings go to our AI provider only to recognise the food, and aren't stored. Nutrition comes from our Indian food database; anything it doesn't know is marked as an estimate.{% if not current_user.is_paid %} Pro gives you 20 photos and 40 voice or typed logs a day. <a href="{{ url_for('billing.pricing') }}">See Pro</a>{% endif %}</p>
+{% endif %}
+{% endblock %}

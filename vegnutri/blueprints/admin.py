@@ -71,7 +71,9 @@ def feature_matrix():
 
     rows = [("Price", *[price(p) for p in order]),
             ("Meal plan length", *[f"{PLANS[p]['plan_days']} days" for p in order]),
-            ("Coach questions a day", *[str(PLANS[p]["coach_daily"]) for p in order])]
+            ("Coach questions a day", *[str(PLANS[p]["coach_daily"]) for p in order]),
+            ("Photo food logging a day", *[str(PLANS[p]["photo_daily"]) for p in order]),
+            ("Voice or typed food logging a day", *[str(PLANS[p]["smart_daily"]) for p in order])]
     rows += [(label, *[key in PLANS[p]["features"] for p in order]) for key, label in FEATURE_NAMES.items()]
     rows.append(("Family members", *[str(PLANS[p].get("max_members", "")) or False for p in order]))
     rows.append(("Grocery list", "2 days", "7 days", "7 days, scaled for household"))

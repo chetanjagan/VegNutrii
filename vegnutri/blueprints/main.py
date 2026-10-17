@@ -54,14 +54,18 @@ def service_worker():
 
 @bp.route("/robots.txt")
 def robots():
-    body = f"User-agent: *\nAllow: /$\nAllow: /privacy\nAllow: /terms\nAllow: /pricing\nDisallow: /\nSitemap: {current_app.config['APP_URL']}/sitemap.xml\n"
+    allow = "".join(f"Allow: {p}\n" for p in ("/$", "/privacy", "/terms", "/refunds", "/disclaimer", "/pricing",
+                                                "/meals", "/meal-plans", "/static/"))
+    body = f"User-agent: *\n{allow}Disallow: /\nSitemap: {current_app.config['APP_URL']}/sitemap.xml\n"
     return body, 200, {"Content-Type": "text/plain"}
 
 
 @bp.route("/sitemap.xml")
 def sitemap():
     base = current_app.config["APP_URL"]
-    urls = "".join(f"<url><loc>{base}{p}</loc></url>" for p in ("/", "/pricing", "/privacy", "/terms"))
+    from .explore import sitemap_paths
+    paths = ["/", "/pricing", "/privacy", "/terms"] + sitemap_paths()
+    urls = "".join(f"<url><loc>{base}{p}</loc></url>" for p in paths)
     return (f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>',
             200, {"Content-Type": "application/xml"})
 

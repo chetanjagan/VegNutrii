@@ -269,3 +269,12 @@ class Coupon(db.Model):
     active = db.Column(db.Boolean, default=True, server_default=true(), nullable=False)
     note = db.Column(db.String(120), default="", nullable=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
+
+
+class AIUsage(db.Model):
+    """One row per successful AI food recognition (photo, voice or text), for daily limits."""
+    __tablename__ = "ai_usage"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    kind = db.Column(db.String(10), nullable=False)  # photo | voice | text
+    created_at = db.Column(db.DateTime, default=utcnow, nullable=False, index=True)

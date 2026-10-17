@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "explore/_card.html" import meal_card with context %}
+{% set public_layout = true %}
+{% block title %}{{ meal.name }}: {{ meal.protein|num }} g protein, {{ meal.kcal|num }} calories{% endblock %}
+{% block description %}{{ meal.name }} has about {{ meal.kcal|num }} kcal and {{ meal.protein|num }} g protein per plate, with {{ meal.iron|num(1) }} mg iron and {{ meal.calcium|num }} mg calcium. {{ cuisine_name }} vegetarian meal ready in {{ meal.mins }} minutes.{% endblock %}
+{% block head %}<link rel="canonical" href="{{ config.APP_URL }}{{ url_for('explore.meal', key=meal.key) }}">{% endblock %}
+{% block public %}
+<nav class="muted" style="padding-top:1.5rem;font-size:.9rem" aria-label="Breadcrumb"><a href="{{ url_for('explore.meals') }}">Meals</a> / {{ cuisine_name }}</nav>
+<div class="page-head" style="margin-top:.5rem">
+  <div>
+    <h1>{{ meal.name }}</h1>
+    <p>{{ cuisine_name }} · {{ meal.slots|map('title')|join(', ') }} · ready in {{ meal.mins }} minutes</p>
+    {% set diets = meal_diets(meal) %}
+    {% if diets %}<p class="row" style="gap:.35rem;margin-top:.6rem">{% for d in diets %}<span class="tag leaf">{{ d }}</span>{% endfor %}</p>{% endif %}
+  </div>
+</div>
+<div class="grid grid-2">
+  <section class="panel">
+    <h2>Nutrition per plate</h2>
+    <div class="grid grid-3" style="margin:.5rem 0 1rem">
+      <div class="stat"><span class="muted">Calories</span><span class="num">{{ meal.kcal|num }}</span></div>
+      <div class="stat"><span class="muted">Protein</span><span class="num">{{ meal.protein|num }}<small> g</small></span></div>
+      <div class="stat"><span class="muted">Cost</span><span class="num">₹{{ meal.cost|num }}</span></div>
+    </div>
+    <div class="scroll-x"><table><tbody>
+      {% for label, key, unit in [('Carbohydrate','carbs','g'),('Fat','fat','g'),('Fibre','fiber','g'),('Iron','iron','mg'),('Calcium','calcium','mg'),('Vitamin B12','b12','mcg'),('Zinc','zinc','mg')] %}
+      <tr><td>{{ label }}</td><td class="r num">{{ meal[key]|num(1) }} {{ unit }}</td></tr>
+      {% endfor %}
+    </tbody></table></div>
+    <h3 style="margin-top:1.25rem">On the plate</h3>
+    <div class="divided">{% for c, q in parts %}<div class="list-row"><span>{{ c.name }}<br><small class="muted">{{ (q|string).rstrip('0').rstrip('.') }} × {{ c.serving }}</small></span><span class="num">{{ (c.kcal*q)|num }} kcal</span></div>{% endfor %}</div>
+    <p class="hint" style="margin-top:.75rem">Estimates from Indian food composition data; your recipe and portions will vary. Cost is approximate ingredient cost.</p>
+  </section>
+  <section class="panel">
+    {% if recipe %}
+    <h2>How to make it</h2>
+    <p class="muted">{{ recipe.description }}</p>
+    <h3 style="margin-top:1rem">Ingredients</h3>
+    <ul style="padding-left:1.2rem;margin:.5rem 0 1rem">{% for i in recipe.ingredients %}<li>{{ i }}</li>{% endfor %}</ul>
+    <h3>Method</h3>
+    <ol style="padding-left:1.2rem;margin-top:.5rem" class="stack">{% for s in recipe.steps %}<li>{{ s }}</li>{% endfor %}</ol>
+    {% else %}
+    <h2>Plan meals like this around your goals</h2>
+    <p class="muted">{{ app_name }} picks meals like {{ meal.name|lower }} to match your calories, protein, budget and diet, then tracks iron, calcium and B12 for you. Members can ask the coach for the full recipe.</p>
+    {% endif %}
+    <a class="btn btn-primary" style="margin-top:1rem" href="{{ url_for('auth.register') }}">{% if config.TRIAL_DAYS %}Try Pro free for {{ config.TRIAL_DAYS }} days{% else %}Start free{% endif %}</a>
+  </section>
+</div>
+{% if similar %}
+<section style="margin-top:2rem">
+  <h2 style="margin-bottom:1rem">Similar meals</h2>
+  <div class="grid grid-3">{% for m in similar %}{{ meal_card(m) }}{% endfor %}</div>
+</section>
+{% endif %}
+{% endblock %}

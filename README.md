@@ -19,6 +19,18 @@ VegNutri plans a week of real Indian meals around each user's calorie and protei
 - Tracking for food, water, weight, mood, a calendar and milestones, plus custom dishes.
 - An installable phone app (PWA), light and dark themes, and full mobile support.
 
+**Snap, say or type (smart logging)**
+- Photograph a plate, record a voice note, or type "do roti aur dal" in English, Hindi, Kannada, Tamil or other languages. Groq's vision and Whisper models identify the foods.
+- The AI only identifies foods and portions. Nutrition always comes from VegNutri's own food database; foods it doesn't know are clearly marked as AI estimates.
+- Users review everything before it's logged (untick items, change servings), and get a warning if a food conflicts with their diet, such as onion for a Jain user.
+- Photos are resized on the phone before upload. Photos and recordings are not stored.
+- Daily limits per plan: Free 2 photos and 5 voice or typed, Pro 20 and 40, Family 30 and 60.
+
+**Public pages that bring in search traffic**
+- `/meals`: all 118 meals, filterable by diet, cuisine and meal, each with its own page (`/meals/<name>`) showing nutrition, diets it suits, recipe and similar meals.
+- `/meal-plans`: sample-day plans for Jain, sattvic, vegan, eggetarian, high-protein, Navratri vrat and five regional cuisines.
+- All are in `sitemap.xml` and allowed in `robots.txt`, with canonical links and descriptions. After deploying, submit `https://your-site/sitemap.xml` in Google Search Console.
+
 **Growth features**
 - A free 7-day Pro trial for every new sign-up (14 days for invited friends). No card needed; it simply ends. Buying during a trial adds the paid time after the trial, so no days are lost.
 - Coupon codes for festival offers and partners, created and switched on or off from `/admin`. Prices are rounded to whole rupees, so the price shown is exactly the price charged.
@@ -84,7 +96,8 @@ Every setting is an environment variable. See `.env.example` for the full list w
 |---|---|
 | `SECRET_KEY` | Required. A long random string. Sessions break without it. |
 | `DATABASE_URL` | Postgres in production. Defaults to a local SQLite file. |
-| `GROQ_API_KEY` | The AI coach. Create one at console.groq.com/keys. Run `flask --app wsgi coach-check` to test it. |
+| `GROQ_API_KEY` | The AI coach and smart logging. Create one at console.groq.com/keys. Run `flask --app wsgi coach-check` to test it; it also shows which photo and speech models will be used. |
+| `GROQ_VISION_MODEL`, `GROQ_WHISPER_MODEL` | Optional. Force the photo or speech model if Groq renames its models. Leave empty for automatic. |
 | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` | Payments. |
 | `BREVO_API_KEY`, `MAIL_FROM` | Email (password resets, weekly summary) via Brevo's HTTPS API. Free tier: 300 emails a day. `MAIL_FROM` must be a sender you've verified in Brevo. |
 | `MAIL_SERVER` and related | SMTP email instead of Brevo. Some hosts' free tiers block SMTP ports, so Brevo is the safer choice. |
@@ -158,7 +171,7 @@ When updating the GitHub repo, delete the old `app.py`, `templates/` and `static
 pytest -q
 ```
 
-118 tests cover admin access and preview, trials, coupons, referrals and the weekly email, plus diet-rule compliance for every diet mode, cuisine and allergy; fasting days; calorie accuracy; target safety floors; children's targets; login, reset tokens and open-redirect protection; CSRF and security headers; users being unable to read or delete each other's data; server-side nutrition values; Razorpay signature, webhook, amount and renewal handling; plan gating; coach quotas; and data export and deletion. CI runs them on every push against both SQLite and Postgres, and checks that migrations apply cleanly and match the models. To run them against Postgres locally, set `TEST_DATABASE_URL=postgresql://...`.
+145 tests cover smart logging (photo, voice, text), the public meal pages, admin access and preview, trials, coupons, referrals and the weekly email, plus diet-rule compliance for every diet mode, cuisine and allergy; fasting days; calorie accuracy; target safety floors; children's targets; login, reset tokens and open-redirect protection; CSRF and security headers; users being unable to read or delete each other's data; server-side nutrition values; Razorpay signature, webhook, amount and renewal handling; plan gating; coach quotas; and data export and deletion. CI runs them on every push against both SQLite and Postgres, and checks that migrations apply cleanly and match the models. To run them against Postgres locally, set `TEST_DATABASE_URL=postgresql://...`.
 
 ## Project layout
 
@@ -198,7 +211,7 @@ These are the highest-value next steps, roughly in order:
 
 1. **Grow the meal catalogue with a dietitian**, especially sattvic Maharashtrian, Bengali and Rajasthani, plus more vegan options. This is the product's moat.
 2. **WhatsApp delivery for the weekly summary.** The email version is built; WhatsApp gets far higher open rates in India.
-3. **Photo and voice logging** in Indian languages, using a vision model and Groq's Whisper speech-to-text.
+3. **A Hindi interface.** Roughly doubles the reachable market; smart logging already understands Hindi.
 4. **Dietitian marketplace.** Verified dietitians run paid programmes in the app and you take a commission.
 5. **Condition programmes** for PCOS, prediabetes and thyroid, built with clinicians.
 6. **Grocery partnerships.** Turn the grocery list into a cart through quick-commerce affiliate programmes where available.

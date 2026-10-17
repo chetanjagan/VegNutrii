@@ -8,7 +8,10 @@
     <h1>Hello, {{ current_user.username }}</h1>
     <p>{{ today.strftime('%A, %d %B') }}{% if plan and plan.fasting %}. A vrat day: your plan uses fasting foods.{% endif %}</p>
   </div>
-  <a class="btn btn-primary" href="{{ url_for('tracker.log_meal') }}">{{ icon('log') }}Log food</a>
+  <div class="row">
+    <a class="btn" href="{{ url_for('quicklog.page') }}">{{ icon('camera') }}Snap or say</a>
+    <a class="btn btn-primary" href="{{ url_for('tracker.log_meal') }}">{{ icon('log') }}Log food</a>
+  </div>
 </div>
 
 {% set tdl = current_user.trial_days_left %}

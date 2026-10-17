@@ -317,6 +317,222 @@
     rzp.open();
   }
 
+  // ── Quick log: snap, say or type ────────────────────────
+  const ql = $("#quicklog");
+  if (ql) {
+    const status = $("#ql-status");
+    const say = (t) => { status.textContent = t; };
+    let busy = false;
+
+    async function upload(url, form) {
+      const res = await fetch(url, { method: "POST", body: form, credentials: "same-origin", headers: { "X-CSRFToken": csrf() } });
+      let body = {};
+      try { body = await res.json(); } catch (e) { body = { message: res.status === 413 ? "That file is too big." : "Something went wrong. Try again." }; }
+      return { ok: res.ok, body };
+    }
+
+    function updateLeft(body) {
+      if (typeof body.photo_left === "number") $$("[data-left='photo']").forEach((el) => (el.textContent = body.photo_left));
+      if (typeof body.smart_left === "number") $$("[data-left='smart']").forEach((el) => (el.textContent = body.smart_left));
+    }
+
+    async function recognise(promise, sourceLabel) {
+      if (busy) return;
+      busy = true;
+      say("Recognising your food…");
+      $("#ql-review").hidden = true;
+      try {
+        const { ok, body } = await promise();
+        if (!ok) {
+          say(body.message || "Couldn't recognise that. Try again.");
+          if (body.upgrade) {
+            const a = document.createElement("a");
+            a.href = body.upgrade; a.textContent = " See Pro for more.";
+            status.appendChild(a);
+          }
+          return;
+        }
+        updateLeft(body);
+        if (!body.items || !body.items.length) { say("I couldn't spot any food. Try again, or type it instead."); return; }
+        say("");
+        showReview(body, sourceLabel);
+      } catch (e) {
+        say("No connection. Check your internet and try again.");
+      } finally {
+        busy = false;
+      }
+    }
+
+    // Photo: shrink in the browser, then upload
+    async function shrink(file) {
+      const MAX = 1024;
+      let bitmap;
+      try { bitmap = await createImageBitmap(file); }
+      catch (e) {
+        const url = URL.createObjectURL(file);
+        bitmap = await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = url;
+        });
+      }
+      const scale = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(bitmap.width * scale);
+      canvas.height = Math.round(bitmap.height * scale);
+      canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));
+    }
+
+    $("#ql-photo").addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      e.target.value = "";
+      if (!file) return;
+      let blob;
+      try { blob = await shrink(file); }
+      catch (err) { say("Couldn't read that photo. Try a JPEG, or take a new photo."); return; }
+      if (!blob) { say("Couldn't read that photo. Try a JPEG, or take a new photo."); return; }
+      const form = new FormData();
+      form.append("image", blob, "meal.jpg");
+      recognise(() => upload("/api/quick-log/photo", form), "From your photo");
+    });
+
+    // Voice: record up to 60 seconds
+    const recBtn = $("#ql-record");
+    const timer = $("#ql-timer");
+    let recorder = null, chunks = [], started = 0, tick = null, autoStop = null;
+    const canRecord = !!(navigator.mediaDevices && window.MediaRecorder);
+    if (!canRecord) { recBtn.disabled = true; recBtn.textContent = "Recording not supported here"; }
+
+    function pickMime() {
+      for (const t of ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg"]) {
+        if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) return t;
+      }
+      return "";
+    }
+
+    function stopRecording() {
+      if (recorder && recorder.state === "recording") recorder.stop();
+    }
+
+    recBtn.addEventListener("click", async () => {
+      if (recorder && recorder.state === "recording") { stopRecording(); return; }
+      if (busy) return;
+      let stream;
+      try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+      catch (e) { say("Microphone access was blocked. Allow it in your browser settings, or type instead."); return; }
+      const mime = pickMime();
+      recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+      chunks = [];
+      recorder.ondataavailable = (ev) => { if (ev.data && ev.data.size) chunks.push(ev.data); };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        clearInterval(tick); clearTimeout(autoStop);
+        timer.textContent = "";
+        recBtn.textContent = "Start recording";
+        recBtn.setAttribute("aria-pressed", "false");
+        recBtn.classList.remove("btn-danger");
+        const type = (recorder.mimeType || mime || "audio/webm");
+        const blob = new Blob(chunks, { type });
+        if (blob.size < 1000) { say("That was too short. Hold on a moment and say what you ate."); return; }
+        const ext = type.includes("mp4") ? "m4a" : type.includes("ogg") ? "ogg" : "webm";
+        const form = new FormData();
+        form.append("audio", blob, "meal." + ext);
+        recognise(() => upload("/api/quick-log/voice", form), "From your voice note");
+      };
+      recorder.start();
+      started = Date.now();
+      recBtn.textContent = "Stop and recognise";
+      recBtn.setAttribute("aria-pressed", "true");
+      recBtn.classList.add("btn-danger");
+      say("Listening… say what you ate.");
+      tick = setInterval(() => { timer.textContent = Math.round((Date.now() - started) / 1000) + "s · "; }, 500);
+      autoStop = setTimeout(stopRecording, 60000);
+    });
+
+    // Text
+    $("#ql-text-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = $("#ql-text").value.trim();
+      if (!text) { say("Type what you ate first."); return; }
+      recognise(() => postJSON("/api/quick-log/text", { text }), "From what you typed");
+    });
+
+    // Review list
+    let current = [];
+    function fmt(n) { return Math.round(n).toLocaleString("en-IN"); }
+
+    function totals() {
+      let kcal = 0, pro = 0;
+      $$(".ql-item", ql).forEach((row, i) => {
+        if (!$("input[type=checkbox]", row).checked) return;
+        const s = parseFloat($("input[type=number]", row).value) || 0;
+        kcal += current[i].per.kcal * s;
+        pro += current[i].per.protein * s;
+        $(".ql-kcal", row).textContent = `${fmt(current[i].per.kcal * s)} kcal, ${(current[i].per.protein * s).toFixed(1)} g protein`;
+      });
+      $("#ql-total-kcal").textContent = fmt(kcal);
+      $("#ql-total-pro").textContent = pro.toFixed(1);
+    }
+
+    function showReview(body, sourceLabel) {
+      current = body.items;
+      const list = $("#ql-items");
+      list.innerHTML = "";
+      body.items.forEach((item, i) => {
+        const row = document.createElement("div");
+        row.className = "ql-item";
+        row.innerHTML =
+          '<label class="check"><input type="checkbox" checked><span><strong class="ql-name"></strong><br>' +
+          '<small class="muted ql-serving"></small></span></label>' +
+          '<div class="ql-qty"><label class="sr-only">Servings</label><input type="number" min="0.25" max="10" step="0.25"></div>' +
+          '<small class="muted ql-kcal"></small><p class="ql-warn" hidden></p>';
+        $(".ql-name", row).textContent = item.name;
+        $(".ql-serving", row).textContent = item.estimate ? "AI estimate, as eaten" : "Servings of " + item.serving;
+        const qty = $("input[type=number]", row);
+        qty.value = item.servings;
+        qty.id = "ql-qty-" + i;
+        $(".ql-qty label", row).setAttribute("for", qty.id);
+        if (item.warning) {
+          const w = $(".ql-warn", row);
+          w.textContent = item.warning;
+          w.hidden = false;
+          if (item.estimate) w.classList.add("is-estimate");
+        }
+        if (item.estimate) { const t = document.createElement("span"); t.className = "tag turmeric"; t.textContent = "Estimate"; $(".ql-name", row).after(" ", t); }
+        list.appendChild(row);
+      });
+      $("#ql-source").textContent = sourceLabel;
+      const note = $("#ql-note");
+      const heard = body.transcript ? `I heard: "${body.transcript}"` : "";
+      note.textContent = [heard, body.note].filter(Boolean).join(" · ");
+      note.hidden = !note.textContent;
+      $("#ql-review").hidden = false;
+      totals();
+      $("#ql-review").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    $("#ql-items").addEventListener("input", totals);
+    $("#ql-items").addEventListener("change", totals);
+
+    $("#ql-save").addEventListener("click", async () => {
+      const items = [];
+      $$(".ql-item", ql).forEach((row, i) => {
+        if (!$("input[type=checkbox]", row).checked) return;
+        const it = current[i];
+        items.push({ key: it.key, name: it.name, per: it.per, servings: parseFloat($("input[type=number]", row).value) || 1 });
+      });
+      if (!items.length) { say("Tick at least one item to log."); return; }
+      const btn = $("#ql-save");
+      btn.disabled = true;
+      const { ok, body } = await postJSON("/api/quick-log/save", { items, meal_type: $("#ql-meal").value, log_date: $("#ql-date").value });
+      btn.disabled = false;
+      if (!ok) { say(body.message || "Couldn't save. Try again."); return; }
+      window.location.href = body.redirect;
+    });
+  }
+
   // ── Thali rings ──────────────────────────────────────────
   function drawRings() {
     $$(".thali .fill[data-pct]").forEach((c) => {

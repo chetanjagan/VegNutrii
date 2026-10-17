@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "explore/_card.html" import meal_card with context %}
+{% set public_layout = true %}
+{% block title %}Indian vegetarian meals with protein and calories{% endblock %}
+{% block description %}{{ total }} Indian vegetarian meals with calories, protein, iron and calcium: Jain, sattvic, vegan, vrat, South Indian, Gujarati and more.{% endblock %}
+{% block head %}<link rel="canonical" href="{{ config.APP_URL }}{{ url_for('explore.meals') }}">{% endblock %}
+{% block public %}
+<div class="page-head" style="padding-top:1.5rem">
+  <div>
+    <h1>Indian vegetarian meals, with the numbers</h1>
+    <p>{{ total }} everyday meals with calories, protein and the nutrients vegetarians watch. Sorted by protein per calorie.</p>
+  </div>
+</div>
+<form class="panel row" method="get" style="margin-bottom:1.25rem;align-items:end">
+  <div class="field" style="margin:0;flex:1;min-width:150px"><label for="f-diet">Diet</label>
+    <select id="f-diet" name="diet"><option value="">Any vegetarian</option>{% for k, v in diets.items() %}<option value="{{ k }}" {% if diet == k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></div>
+  <div class="field" style="margin:0;flex:1;min-width:150px"><label for="f-cuisine">Cuisine</label>
+    <select id="f-cuisine" name="cuisine"><option value="">All cuisines</option>{% for k, v in CUISINES.items() %}<option value="{{ k }}" {% if cuisine == k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></div>
+  <div class="field" style="margin:0;flex:1;min-width:150px"><label for="f-slot">Meal</label>
+    <select id="f-slot" name="slot"><option value="">Any meal</option>{% for k, v in SLOT_NAMES.items() %}<option value="{{ k }}" {% if slot == k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></div>
+  <button class="btn btn-primary" type="submit">Show meals</button>
+</form>
+<p class="muted" style="margin-bottom:1rem">{{ items|length }} meal{{ 's' if items|length != 1 }}</p>
+<div class="grid grid-3">
+  {% for m in items %}{{ meal_card(m) }}{% else %}<p class="muted">No meals match. Try fewer filters.</p>{% endfor %}
+</div>
+<section class="section" style="margin-top:2rem">
+  <h2>Want these planned around your protein target?</h2>
+  <p class="lead">{{ app_name }} builds your week from these meals, matched to your calories, protein, budget and diet rules.</p>
+  <a class="btn btn-primary" href="{{ url_for('auth.register') }}">{% if config.TRIAL_DAYS %}Try Pro free for {{ config.TRIAL_DAYS }} days{% else %}Start free{% endif %}</a>
+  <a class="btn" href="{{ url_for('explore.meal_plans_index') }}">See sample meal plans</a>
+</section>
+{% endblock %}

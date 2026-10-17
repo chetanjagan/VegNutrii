@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% set public_layout = true %}
+{% block title %}Indian vegetarian meal plans by diet{% endblock %}
+{% block description %}Sample Indian vegetarian meal plans: Jain, sattvic, vegan, eggetarian, high-protein, Navratri vrat and regional cuisines.{% endblock %}
+{% block head %}<link rel="canonical" href="{{ config.APP_URL }}{{ url_for('explore.meal_plans_index') }}">{% endblock %}
+{% block public %}
+<div class="page-head" style="padding-top:1.5rem"><div><h1>Vegetarian meal plans</h1><p>A sample day for each diet, balanced for protein. Your own plan is built to your body and goals.</p></div></div>
+<div class="grid grid-2">
+  {% for slug, page in pages.items() %}
+  <a class="panel meal-card" href="{{ url_for('explore.meal_plan_page', slug=slug) }}"><strong>{{ page[0] }}</strong><span class="muted">{{ page[1] }}</span></a>
+  {% endfor %}
+</div>
+{% endblock %}

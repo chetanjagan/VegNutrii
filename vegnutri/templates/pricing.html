@@ -36,6 +36,7 @@
       <li>Food, water, weight and mood tracking</li>
       <li>3-day meal plans for your diet</li>
       <li>5 coach questions a day</li>
+      <li>Snap 2 photos and say or type 5 meals a day</li>
       <li>Iron tracking</li>
       <li>2-day grocery list</li>
     </ul>
@@ -54,6 +55,7 @@
       <li>Iron, calcium, B12 and zinc tracking</li>
       <li>Weekly grocery list from your plan</li>
       <li>60 coach questions a day</li>
+      <li>Snap 20 photos and say or type 40 meals a day</li>
     </ul>
     {% if current_user.is_authenticated %}
       <button type="button" class="btn btn-primary" data-checkout="pro" data-period="year" {% if not configured and not demo %}disabled{% endif %}>
@@ -73,6 +75,7 @@
       <li>Per-person portions for each meal</li>
       <li>Grocery list scaled for the household</li>
       <li>100 coach questions a day</li>
+      <li>Snap 30 photos and say or type 60 meals a day</li>
     </ul>
     {% if current_user.is_authenticated %}
       <button type="button" class="btn btn-primary" data-checkout="family" data-period="year" {% if not configured and not demo %}disabled{% endif %}>

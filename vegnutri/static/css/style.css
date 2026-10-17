@@ -357,3 +357,25 @@ details p { margin-top: .5rem; color: var(--ink-2); }
 .price-card .price .was { font-size: 1rem; font-weight: 500; color: var(--ink-3); margin-left: .5rem; }
 .tag { display: inline-flex; align-items: center; gap: .25rem; }
 .tag svg { width: 13px; height: 13px; flex: none; }
+
+/* Quick log */
+.ql-card { display: flex; flex-direction: column; gap: .75rem; align-items: flex-start; }
+.ql-card textarea { min-height: 72px; }
+.ql-card form { width: 100%; }
+.ql-file { position: relative; overflow: hidden; }
+.ql-file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0; }
+.ql-file:focus-within { outline: 3px solid var(--turmeric-bright); outline-offset: 2px; }
+.ql-item { display: grid; grid-template-columns: 1fr 90px; gap: .35rem 1rem; padding: .85rem 0; align-items: center; }
+.ql-item:first-child { padding-top: 0; }
+.ql-item .check { margin: 0; }
+.ql-item .ql-kcal, .ql-item .ql-warn { grid-column: 1 / -1; }
+.ql-item .ql-qty input { text-align: center; }
+.ql-warn { color: var(--chilli); font-size: .88rem; }
+.btn-danger.btn-primary, .btn-primary.btn-danger { background: var(--chilli); border-color: var(--chilli); color: #fff; }
+
+/* Public meal library */
+.meal-card { display: flex; flex-direction: column; gap: .4rem; text-decoration: none; color: var(--ink); transition: border-color .15s; }
+.meal-card:hover { border-color: var(--leaf); color: var(--ink); }
+.meal-card strong { font-family: var(--font-display); font-size: 1.05rem; }
+.ql-warn.is-estimate { color: var(--ink-2); }
+.meal.no-actions { grid-template-columns: 1fr; }

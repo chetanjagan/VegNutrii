@@ -21,7 +21,7 @@
   <aside class="rail" aria-label="Main navigation">
     <a class="brand" href="{{ url_for('tracker.dashboard') }}">{{ logo() }}<span>{{ app_name }}</span></a>
     <nav>
-      {% for endpoint, label, ic in [('tracker.dashboard','Today','today'),('planner.meal_plan','Meal plan','plan'),('tracker.log_meal','Log food','log'),('coach.page','Coach','coach'),('planner.grocery','Grocery list','grocery')] %}
+      {% for endpoint, label, ic in [('tracker.dashboard','Today','today'),('planner.meal_plan','Meal plan','plan'),('tracker.log_meal','Log food','log'),('quicklog.page','Snap or say','camera'),('coach.page','Coach','coach'),('planner.grocery','Grocery list','grocery')] %}
       <a href="{{ url_for(endpoint) }}" {% if ep == endpoint %}aria-current="page"{% endif %}>{{ icon(ic) }}{{ label }}</a>
       {% endfor %}
       <div class="group">Track</div>
@@ -82,6 +82,7 @@
   <header class="site-head">
     <a class="brand" href="{{ url_for('main.index') }}">{{ logo() }}<span>{{ app_name }}</span></a>
     <nav>
+      <a class="btn btn-quiet hide-sm" href="{{ url_for('explore.meals') }}">Meals</a>
       <a class="btn btn-quiet hide-sm" href="{{ url_for('billing.pricing') }}">Pricing</a>
       {% if current_user.is_authenticated %}
         <a class="btn btn-primary" href="{{ url_for('tracker.dashboard') }}">Open app</a>
@@ -99,6 +100,8 @@
     <div class="inner">
       <span>© {{ year }} {{ company_name }}. Nutrition guidance, not medical advice.</span>
       <nav aria-label="Legal">
+        <a href="{{ url_for('explore.meals') }}">Meals</a>
+        <a href="{{ url_for('explore.meal_plans_index') }}">Meal plans</a>
         <a href="{{ url_for('main.privacy') }}">Privacy</a>
         <a href="{{ url_for('main.terms') }}">Terms</a>
         <a href="{{ url_for('main.refunds') }}">Refunds</a>

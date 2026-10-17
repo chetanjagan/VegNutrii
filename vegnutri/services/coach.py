@@ -61,12 +61,8 @@ def quota(user):
     return {"limit": limit, "used": used, "left": max(limit - used, 0)}
 
 
-def available_models(force=False):
-    """Model ids to try, in preference order. Uses Groq's /models list (cached for an hour)."""
-    preferred = list(PREFERRED_MODELS)
-    override = (current_app.config.get("GROQ_MODEL") or "").strip()
-    if override:
-        preferred = [override] + [m for m in preferred if m != override]
+def listed_model_ids(force=False):
+    """Set of model ids this key can use (cached for an hour), or None if Groq couldn't be asked."""
     if force or not _model_cache["ids"] or time.time() - _model_cache["at"] > 3600:
         try:
             r = requests.get(f"{API}/models", headers=_headers(), timeout=10)
@@ -76,11 +72,26 @@ def available_models(force=False):
                 current_app.logger.warning("Groq /models returned HTTP %s: %s", r.status_code, r.text[:300])
         except requests.RequestException as exc:
             current_app.logger.warning("Groq /models unreachable: %s", exc)
-    ids = _model_cache["ids"]
+    return _model_cache["ids"]
+
+
+def pick_models(preferred, override=""):
+    """Order `preferred` (with any override first), keeping only models the key can use."""
+    override = (override or "").strip()
+    if override:
+        preferred = [override] + [m for m in preferred if m != override]
+    ids = listed_model_ids()
     if not ids:
         return preferred  # couldn't list; just try them
     usable = [m for m in preferred if m in ids]
     return usable or preferred
+
+
+def available_models(force=False):
+    """Chat model ids to try, in preference order."""
+    if force:
+        listed_model_ids(force=True)
+    return pick_models(list(PREFERRED_MODELS), current_app.config.get("GROQ_MODEL"))
 
 
 def system_prompt(user, profile, today_totals, plan_view, gaps):

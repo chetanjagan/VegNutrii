@@ -37,8 +37,9 @@ def create_app(config_class=Config):
     def load_user(user_id):
         return db.session.get(models.User, int(user_id))
 
-    from .blueprints import account, admin, auth, billing, coach, main, planner, tracker
-    for bp in (main.bp, auth.bp, tracker.bp, planner.bp, coach.bp, billing.bp, account.bp, admin.bp):
+    from .blueprints import account, admin, auth, billing, coach, explore, main, planner, quicklog, tracker
+    for bp in (main.bp, auth.bp, tracker.bp, planner.bp, coach.bp, billing.bp, account.bp, admin.bp, quicklog.bp,
+               explore.bp):
         app.register_blueprint(bp)
     csrf.exempt(billing.webhook)  # authenticated by Razorpay's HMAC signature instead
     csrf.exempt(main.weekly_digest_task)  # authenticated by TASK_TOKEN instead
@@ -104,7 +105,7 @@ def _register_security_headers(app):
         ]))
         resp.headers.setdefault("X-Content-Type-Options", "nosniff")
         resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
-        resp.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+        resp.headers.setdefault("Permissions-Policy", "camera=(self), microphone=(self), geolocation=()")
         if request.is_secure:
             resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         return resp
@@ -119,6 +120,7 @@ def _register_errors(app):
     app.register_error_handler(404, lambda e: render(404, "Page not found", "That page doesn't exist. Check the link or go back home."))
     app.register_error_handler(403, lambda e: render(403, "Not allowed", "You don't have access to this page."))
     app.register_error_handler(429, lambda e: render(429, "Slow down", "Too many requests. Wait a minute and try again."))
+    app.register_error_handler(413, lambda e: render(413, "That file is too big", "Photos and voice notes must be under 12 MB."))
     app.register_error_handler(400, lambda e: render(400, "Something was off with that request", "Refresh the page and try again."))
 
     @app.errorhandler(500)
@@ -139,9 +141,13 @@ def _register_cli(app):
     @app.cli.command("coach-check")
     def coach_check():
         """Test the Groq connection and show exactly what's wrong if the coach fails."""
-        from .services.coach import diagnose
+        from .services.coach import diagnose, is_configured
         for line in diagnose():
             click.echo(line)
+        if is_configured():
+            from .services.quicklog import diagnose_lines
+            for line in diagnose_lines():
+                click.echo(line)
 
     @app.cli.command("make-admin")
     @click.argument("email")
